@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Reports - Dar Al-'Ulum Montréal Hifz Management System">
+    <title>Reports - Dar Al-'Ulum Montréal</title>
+    <link rel="stylesheet" href="../../css/admin/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../components/js/admin_reports.js" defer></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <header class="admin-header">
+            <div class="logo">
+                <img src="/path/to/logo.png" alt="Dar Al-'Ulum Montréal Logo">
+            </div>
+            <h1>Reports</h1>
+            <nav class="user-nav">
+                <button id="notificationsToggle" aria-label="Notifications">
+                    <span class="icon">🔔</span>
+                </button>
+                <div class="user-menu">
+                    <img src="/path/to/admin-avatar.png" alt="" class="user-avatar">
+                    <span class="user-name">Admin Name</span>
+                </div>
+            </nav>
+        </header>
+
+        <nav class="admin-sidebar">
+            <ul>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="manage_teachers.html">Manage Teachers</a></li>
+                <li><a href="manage_students.html">Manage Students</a></li>
+                <li><a href="#" class="active">Reports</a></li>
+                <li><a href="settings.html">Settings</a></li>
+            </ul>
+        </nav>
+
+        <main class="admin-main">
+            <section class="report-options">
+                <h2>Generate Reports</h2>
+                <div class="report-buttons">
+                    <button id="attendanceReportBtn" class="btn">Attendance Report</button>
+                    <button id="progressReportBtn" class="btn">Progress Report</button>
+                    <button id="teacherPerformanceBtn" class="btn">Teacher Performance</button>
+                </div>
+            </section>
+
+            <section class="report-display">
+                <h2 id="reportTitle">Report</h2>
+                <div class="report-filters">
+                    <label for="dateRange">Date Range:</label>
+                    <select id="dateRange">
+                        <option value="week">Last Week</option>
+                        <option value="month">Last Month</option>
+                        <option value="quarter">Last Quarter</option>
+                        <option value="year">Last Year</option>
+                    </select>
+                    <button id="generateReportBtn" class="btn">Generate Report</button>
+                </div>
+                <div id="reportContent">
+                    <!-- Report content will be dynamically inserted here -->
+                </div>
+                <div class="chart-container">
+                    <canvas id="reportChart"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <footer class="admin-footer">
+            <p>&copy; 2024 Dar Al-'Ulum Montréal. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

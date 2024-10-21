@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Dashboard for Dar Al-'Ulum Montréal Hifz Management System">
+    <title>Admin Dashboard - Dar Al-'Ulum Montréal</title>
+    <link rel="stylesheet" href="../../css/admin/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../components/js/admin_dashboard.js" defer></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <header class="admin-header">
+            <div class="logo">
+                <img src="/path/to/logo.png" alt="Dar Al-'Ulum Montréal Logo">
+            </div>
+            <h1>Admin Dashboard</h1>
+            <nav class="user-nav">
+                <button id="notificationsToggle" aria-label="Notifications">
+                    <span class="icon">🔔</span>
+                </button>
+                <div class="user-menu">
+                    <img src="/path/to/admin-avatar.png" alt="" class="user-avatar">
+                    <span class="user-name">Admin Name</span>
+                </div>
+            </nav>
+        </header>
+
+        <nav class="admin-sidebar">
+            <ul>
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="manage_teachers.html">Manage Teachers</a></li>
+                <li><a href="manage_students.html">Manage Students</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li><a href="settings.html">Settings</a></li>
+            </ul>
+        </nav>
+
+        <main class="admin-main">
+            <section class="dashboard-overview">
+                <h2>System Overview</h2>
+                <div class="stat-cards">
+                    <div class="stat-card">
+                        <h3>Total Students</h3>
+                        <p id="totalStudents">Loading...</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Teachers</h3>
+                        <p id="totalTeachers">Loading...</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Classes</h3>
+                        <p id="activeClasses">Loading...</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Attendance</h3>
+                        <p id="averageAttendance">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-charts">
+                <div class="chart-container">
+                    <h3>Student Progress</h3>
+                    <canvas id="studentProgressChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Attendance Trends</h3>
+                    <canvas id="attendanceTrendChart"></canvas>
+                </div>
+            </section>
+
+            <section class="recent-activities">
+                <h2>Recent Activities</h2>
+                <ul id="recentActivitiesList">
+                    <!-- Activities will be populated here -->
+                </ul>
+            </section>
+        </main>
+
+        <footer class="admin-footer">
+            <p>&copy; 2024 Dar Al-'Ulum Montréal. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

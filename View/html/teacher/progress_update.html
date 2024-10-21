@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Student Progress Update Page for Dar Al-'Ulum Montréal Hifz Management System">
+    <title>Update Student Progress - Dar Al-'Ulum Montréal</title>
+    <link rel="stylesheet" href="../../css/teacher/styles.css">
+    <script src="../../components/js/teacher_progress_update.js" defer></script>
+</head>
+<body>
+    <header role="banner">
+        <?php include '../../components/php/teacher_header.php'; ?>
+    </header>
+
+    <div class="layout-container">
+        <nav role="navigation" aria-label="Main Navigation">
+            <?php include '../../components/php/teacher_sidebar.php'; ?>
+        </nav>
+
+        <main role="main" class="progress-update">
+            <h1>Update Student Progress</h1>
+
+            <form id="progressForm" aria-labelledby="progress-form-heading">
+                <h2 id="progress-form-heading" class="sr-only">Progress Update Form</h2>
+
+                <div class="form-group">
+                    <label for="studentSelect">Select Student:</label>
+                    <select id="studentSelect" name="studentId" required>
+                        <option value="">Choose a student</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="currentSurah">Current Surah:</label>
+                    <input type="number" id="currentSurah" name="currentSurah" min="1" max="114" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="versesMemorized">Verses Memorized:</label>
+                    <input type="number" id="versesMemorized" name="versesMemorized" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastRevisionDate">Last Revision Date:</label>
+                    <input type="date" id="lastRevisionDate" name="lastRevisionDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="teacherNotes">Notes:</label>
+                    <textarea id="teacherNotes" name="teacherNotes" rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Progress</button>
+            </form>
+        </main>
+    </div>
+
+    <footer role="contentinfo">
+        <?php include '../../components/php/teacher_footer.php'; ?>
+    </footer>
+</body>
+</html>
