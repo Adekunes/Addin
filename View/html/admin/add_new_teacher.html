@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Teacher - Dar Al-'Ulum Montréal</title>
+    <link rel="stylesheet" href="../../css/admin/styles.css">
+    <link rel="stylesheet" href="../../css/admin/modal.css">
+</head>
+<body>
+    <!-- This content will be loaded into a modal -->
+    <div class="modal-content">
+        <h2>Add New Teacher</h2>
+        <form id="addTeacherForm">
+            <div class="form-group">
+                <label for="teacherName">Full Name:</label>
+                <input type="text" id="teacherName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="teacherEmail">Email:</label>
+                <input type="email" id="teacherEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="teacherPhone">Phone:</label>
+                <input type="tel" id="teacherPhone" name="phone">
+            </div>
+            <div class="form-group">
+                <label for="teacherSubjects">Subjects:</label>
+                <input type="text" id="teacherSubjects" name="subjects">
+            </div>
+            <div class="form-group">
+                <label for="teacherQualifications">Qualifications:</label>
+                <textarea id="teacherQualifications" name="qualifications"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="teacherStartDate">Start Date:</label>
+                <input type="date" id="teacherStartDate" name="startDate">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Teacher</button>
+                <button type="button" class="btn btn-secondary" id="cancelAddTeacher">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <script src="../../js/admin/add_new_teacher.js"></script>
+</body>
+</html>

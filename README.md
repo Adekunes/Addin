@@ -5,7 +5,7 @@ A detailed overview for an administrative dashboard tailored for managing Hifz c
 
 
 
-Source
+SoSource
 │
 ├── View
 │   ├── html
@@ -13,14 +13,17 @@ Source
 │   │   │   ├── dashboard.html
 │   │   │   ├── manage_teachers.html
 │   │   │   ├── manage_students.html
-│   │   │   └── reports.html
+│   │   │   ├── reports.html
+│   │   │   ├── add_new_teacher.html    // New
+│   │   │   └── add_new_student.html    // New
 │   │   └── teacher
 │   │       ├── dashboard.html
 │   │       ├── attendance.html
 │   │       └── progress_update.html
 │   └── css
 │       ├── admin
-│       │   └── styles.css
+│       │   ├── styles.css
+│       │   └── modal.css               // New
 │       └── teacher
 │           └── styles.css
 │
@@ -37,6 +40,8 @@ Source
 │       ├── admin_manage_teachers.js
 │       ├── admin_manage_students.js
 │       ├── admin_reports.js
+│       ├── add_new_teacher.js         // New
+│       ├── add_new_student.js         // New
 │       ├── teacher_dashboard.js
 │       ├── teacher_attendance.js
 │       └── teacher_progress_update.js
@@ -51,8 +56,6 @@ Source
     └── password
         ├── admin_password_reset.php
         └── teacher_password_reset.php
-
-
 
 
 
