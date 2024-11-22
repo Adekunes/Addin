@@ -27,7 +27,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
         
         <div class="overview-cards">
             <div class="card">
-                <h3>Today's Classes</h3>
+                <h3>Today's Classes</h3> 
                 <div id="todayClasses">Loading...</div>
             </div>
             <div class="card">

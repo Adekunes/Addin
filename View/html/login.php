@@ -102,6 +102,15 @@
         .role-toggle a:hover {
             text-decoration: underline;
         }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -114,6 +123,10 @@
         <?php
         if (isset($_GET['error'])) {
             echo '<div class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
+        }
+        if (isset($_GET['success'])) {
+            echo '<div class="success-message">Login successful!</div>';
+            echo '<script>console.log("Login successful!");</script>';
         }
         ?>
 

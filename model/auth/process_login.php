@@ -13,30 +13,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     try {
+        // Start session at the beginning
+        session_start();
+        
+        // Sanitize inputs
+        $username = filter_var(trim($username), FILTER_SANITIZE_STRING);
+        $password = trim($password);
+        $role = filter_var(trim($role), FILTER_SANITIZE_STRING);
+        
         // Prepare SQL statement to prevent SQL injection
-        $stmt = $conn->prepare("SELECT id, password, role FROM users WHERE username = ? AND role = ?");
+        $stmt = $conn->prepare("SELECT id, password, role, status FROM users WHERE username = ? AND role = ?");
         $stmt->execute([$username, $role]);
-        $user = $stmt->fetch();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password'])) {
-            // Start session and set session variables
-            session_start();
+        if ($user && $user['status'] === 'active' && password_verify($password, $user['password'])) {
+            // Set session variables
             $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $username;
             $_SESSION['role'] = $user['role'];
+            $_SESSION['last_activity'] = time();
+
+            // Regenerate session ID for security
+            session_regenerate_id(true);
 
             // Redirect based on role
-            if ($role == 'admin') {
+            if ($role === 'admin') {
                 header("Location: ../../View/html/admin/dashboard.php");
             } else {
                 header("Location: ../../View/html/teacher/dashboard.php");
             }
             exit();
         } else {
-            header("Location: ../../View/html/login.php?error=Invalid username or password");
+            header("Location: ../../View/html/login.php?error=" . urlencode("Invalid username or password"));
             exit();
         }
     } catch (PDOException $e) {
-        header("Location: ../../View/html/login.php?error=Database error occurred");
+        error_log("Login error: " . $e->getMessage());
+        header("Location: ../../View/html/login.php?error=" . urlencode("Database error occurred"));
         exit();
     }
 }

@@ -33,3 +33,9 @@ function isLoggedIn() {
 function hasRole($role) {
     return isset($_SESSION['user_role']) && $_SESSION['user_role'] === $role;
 }
+
+// Set session parameters for better security
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_secure', 1); // If using HTTPS
+session_name('secure_session');
