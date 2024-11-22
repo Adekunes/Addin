@@ -1,11 +1,11 @@
 # Source_folder_final_v2
- Assume the role of an expert programmer with comprehensive knowledge in all areas of software development to create a detailed overview for an administrative dashboard tailored for managing Hifz classes at Dar Al-'Ulum Montréal; this overview should encompass key elements such as a dashboard for vital statistics and recent activities, robust student management features, teacher management tools for scheduling and assignments, Hifz progress tracking mechanisms, attendance monitoring systems, and class organization capabilities, while also addressing admin responsibilities, user interface design principles, and the technical architecture using relevant programming languages and technologies like HTML, CSS, JavaScript, and any other necessary frameworks.
+A detailed overview for an administrative dashboard tailored for managing Hifz classes at Dar Al-'Ulum Montréal; this overview should encompass key elements such as a dashboard for vital statistics and recent activities, robust student management features, teacher management tools for scheduling and assignments, Hifz progress tracking mechanisms, attendance monitoring systems, and class organization capabilities, while also addressing admin responsibilities, user interface design principles, and the technical architecture using relevant programming languages and technologies like HTML, CSS, JavaScript, and any other necessary frameworks.
 
 
 
 
 
-Source
+SoSource
 │
 ├── View
 │   ├── html
@@ -13,14 +13,17 @@ Source
 │   │   │   ├── dashboard.html
 │   │   │   ├── manage_teachers.html
 │   │   │   ├── manage_students.html
-│   │   │   └── reports.html
+│   │   │   ├── reports.html
+│   │   │   ├── add_new_teacher.html    // New
+│   │   │   └── add_new_student.html    // New
 │   │   └── teacher
 │   │       ├── dashboard.html
 │   │       ├── attendance.html
 │   │       └── progress_update.html
 │   └── css
 │       ├── admin
-│       │   └── styles.css
+│       │   ├── styles.css
+│       │   └── modal.css               // New
 │       └── teacher
 │           └── styles.css
 │
@@ -37,6 +40,8 @@ Source
 │       ├── admin_manage_teachers.js
 │       ├── admin_manage_students.js
 │       ├── admin_reports.js
+│       ├── add_new_teacher.js         // New
+│       ├── add_new_student.js         // New
 │       ├── teacher_dashboard.js
 │       ├── teacher_attendance.js
 │       └── teacher_progress_update.js
@@ -51,8 +56,6 @@ Source
     └── password
         ├── admin_password_reset.php
         └── teacher_password_reset.php
-
-
 
 
 
