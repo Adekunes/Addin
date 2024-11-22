@@ -20,14 +20,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <?php include '../../../components/layouts/sidebar.html'; ?>
+    <?php include '../../../components/php/sidebar.php'; ?>
     
     <div class="main-content">
         <h1>Teacher Dashboard</h1>
         
         <div class="overview-cards">
             <div class="card">
-                <h3>Today's Classes</h3>
+                <h3>Today's Classes</h3> 
                 <div id="todayClasses">Loading...</div>
             </div>
             <div class="card">

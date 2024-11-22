@@ -1,35 +1,26 @@
 <?php
-// Database configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'hifz_system');
+class Database {
+    private $host = "localhost";
+    private $db_name = "hifz_system";
+    private $username = "root";
+    private $password = "";
+    public $conn;
 
-// Create connection
-try {
-    $conn = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME,
-        DB_USER,
-        DB_PASS
-    );
-    // Set the PDO error mode to exception
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    public function getConnection() {
+        $this->conn = null;
+
+        try {
+            $this->conn = new PDO(
+                "mysql:host=" . $this->host . ";dbname=" . $this->db_name,
+                $this->username,
+                $this->password
+            );
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch(PDOException $e) {
+            echo "Connection Error: " . $e->getMessage();
+        }
+
+        return $this->conn;
+    }
 }
-
-// Session configuration
-session_start();
-
-// Base URL configuration
-define('BASE_URL', 'http://localhost/hifz-system/');
-
-// Function to check if user is logged in
-function isLoggedIn() {
-    return isset($_SESSION['user_id']);
-}
-
-// Function to check user role
-function hasRole($role) {
-    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === $role;
-}
+?>

@@ -102,6 +102,15 @@
         .role-toggle a:hover {
             text-decoration: underline;
         }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -112,12 +121,19 @@
         </div>
 
         <?php
+        if (isset($_GET['message'])) {
+            echo '<div class="success-message">' . htmlspecialchars($_GET['message']) . '</div>';
+        }
         if (isset($_GET['error'])) {
             echo '<div class="error-message">' . htmlspecialchars($_GET['error']) . '</div>';
         }
+        if (isset($_GET['success'])) {
+            echo '<div class="success-message">Login successful!</div>';
+            echo '<script>console.log("Login successful!");</script>';
+        }
         ?>
 
-        <form action="../../../model/auth/process_login.php" method="POST">
+        <form action="../../model/auth/process_login.php" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
