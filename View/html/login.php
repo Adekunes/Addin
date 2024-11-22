@@ -119,7 +119,7 @@
             <img src="../../../assets/images/logo.png" alt="Dar Al-'Ulum Montréal Logo" class="logo">
             <h1>Welcome Back</h1>
         </div>
-
+<!-- /**testing */bjb -->
         <?php
         if (isset($_GET['message'])) {
             echo '<div class="success-message">' . htmlspecialchars($_GET['message']) . '</div>';
