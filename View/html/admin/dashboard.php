@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="../../css/admin/styles.css">
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/layouts/admin_sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <!-- Dashboard specific CSS -->
@@ -37,7 +37,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     </style>
 </head>
 <body>
-    <?php include '../../../components/layouts/sidebar.html'; ?>
+    <?php include 'C:\xampp\htdocs\Source_folder_final_v2\components\php\admin_sidebar.php'; ?>
     
     <div class="main-content">
         <h1>Admin Dashboard</h1>

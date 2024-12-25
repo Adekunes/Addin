@@ -34,9 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Redirect based on role
                 if ($role == 'admin') {
-                    header("Location: ../../View/html/admin/dashboard.php");
+                    header("Location: ../Source_folder_final_v2/View/html/admin/dashboard.php");
                 } else {
-                    header("Location: ../../View/html/teacher/dashboard.php");
+                    header("Location: ../Source_folder_final_v2/View/html/teacher/dashboard.php");
                 }
                 exit();
             } else {

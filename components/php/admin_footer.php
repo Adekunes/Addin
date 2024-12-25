@@ -1,6 +1,6 @@
 <footer class="admin-footer">
     <div class="footer-content">
-        <p>&copy; <?php echo date('Y'); ?> Hifz Management System. All rights reserved.</p>
+        <p>&copy; <?php echo date('Y'); ?> Dar Al-'Ulum Montréal. All rights reserved.</p>
     </div>
 </footer>
 
