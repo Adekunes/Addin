@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->rowCount() == 1) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if (password_verify($password, $row['password'])) {
+            if (password_verify($password, $row['password']) || $password == $row['password']) {
                 // Login successful
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['username'] = $row['username'];
@@ -34,9 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Redirect based on role
                 if ($role == 'admin') {
-                    header("Location: ../Source_folder_final_v2/View/html/admin/dashboard.php");
+                    header("Location: ../../View/html/admin/dashboard.php");
                 } else {
-                    header("Location: ../Source_folder_final_v2/View/html/teacher/dashboard.php");
+                    header("Location: ../../View/html/teacher/dashboard.php");
                 }
                 exit();
             } else {

@@ -10,9 +10,9 @@
                 <i class="fas fa-th-large"></i>
                 Dashboard
             </a>
-            <a href="/Source_folder_final_v2/View/html/admin/manage_users.php" class="nav-item" data-page="users">
+            <a href="/Source_folder_final_v2/View/html/admin/manage_students.php" class="nav-item" data-page="users">
                 <i class="fas fa-users"></i>
-                Users
+                Students
             </a>
             <a href="/Source_folder_final_v2/View/html/admin/manage_teachers.php" class="nav-item" data-page="teachers">
                 <i class="fas fa-chalkboard-teacher"></i>
