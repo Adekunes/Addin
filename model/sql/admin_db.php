@@ -136,27 +136,11 @@ class AdminDatabase {
 
     public function getAllStudents() {
         try {
-            $query = "SELECT s.*, p.current_juz, p.completed_juz, p.memorization_quality, 
-                         p.tajweed_level, p.teacher_notes, jm.mastery_level,
-                         (
-                             SELECT MAX(revision_date) 
-                             FROM juz_revisions 
-                             WHERE student_id = s.id
-                         ) as last_revision_date,
-                         (
-                             SELECT COUNT(*) 
-                             FROM juz_revisions 
-                             WHERE student_id = s.id
-                         ) as revision_count
-                   FROM students s
-                   LEFT JOIN progress p ON s.id = p.student_id
-                   LEFT JOIN juz_mastery jm ON s.id = jm.student_id 
-                       AND jm.juz_number = COALESCE(p.current_juz, 1)
-                   GROUP BY s.id
-                   ORDER BY s.name ASC";
-            
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
+            $query = "SELECT id, name, current_juz, guardian_name, guardian_contact 
+                      FROM students 
+                      WHERE status = 'active' 
+                      ORDER BY name";
+            $stmt = $this->db->query($query);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch(PDOException $e) {
             error_log("Error fetching students: " . $e->getMessage());

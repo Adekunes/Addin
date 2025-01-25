@@ -16,6 +16,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
             <li>
+                <a href="manage_students.php" class="<?php echo ($current_page == 'manage_students.php') ? 'active' : ''; ?>">
+                    <i class="fas fa-users"></i>
+                    My Students
+                </a>
+            </li>
+            <li>
                 <a href="attendance.php" class="<?php echo ($current_page == 'attendance.php') ? 'active' : ''; ?>">
                     <i class="fas fa-clipboard-check"></i>
                     Attendance
