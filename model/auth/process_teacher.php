@@ -1,59 +1,84 @@
 <?php
+header('Content-Type: application/json');
 session_start();
-require_once '../config/config.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../../View/html/login.php');
-    exit();
-}
+require_once '../sql/admin_db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $database = new Database();
-    $db = $database->getConnection();
+try {
+    $adminDb = new AdminDatabase();
     
-    try {
-        // Begin transaction
-        $db->beginTransaction();
-        
-        // Insert into users table first
-        $userQuery = "INSERT INTO users (username, password, email, role) 
-                     VALUES (:username, :password, :email, 'teacher')";
-        $userStmt = $db->prepare($userQuery);
-        
-        $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        
-        $userStmt->bindParam(':username', $_POST['username']);
-        $userStmt->bindParam(':password', $hashedPassword);
-        $userStmt->bindParam(':email', $_POST['email']);
-        $userStmt->execute();
-        
-        $userId = $db->lastInsertId();
-        
-        // Insert into teachers table
-        $teacherQuery = "INSERT INTO teachers (user_id, name, phone, subjects, status) 
-                        VALUES (:user_id, :name, :phone, :subjects, :status)";
-        $teacherStmt = $db->prepare($teacherQuery);
-        
-        $teacherStmt->bindParam(':user_id', $userId);
-        $teacherStmt->bindParam(':name', $_POST['name']);
-        $teacherStmt->bindParam(':phone', $_POST['phone']);
-        $teacherStmt->bindParam(':subjects', $_POST['subjects']);
-        $teacherStmt->bindParam(':status', $_POST['status']);
-        $teacherStmt->execute();
-        
-        // Commit transaction
-        $db->commit();
-        
-        $_SESSION['success_message'] = "Teacher added successfully!";
-        header('Location: ../../View/html/admin/manage_teachers.php');
-        exit();
-        
-    } catch(PDOException $e) {
-        // Rollback transaction on error
-        $db->rollBack();
-        $_SESSION['error_message'] = "Error adding teacher: " . $e->getMessage();
-        header('Location: ../../View/html/admin/add_new_teacher.php');
-        exit();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!isset($_POST['action'])) {
+            throw new Exception('No action specified');
+        }
+
+        switch ($_POST['action']) {
+            case 'add_teacher':
+                // Validate required fields
+                $requiredFields = ['name', 'username', 'email', 'phone', 'password'];
+                foreach ($requiredFields as $field) {
+                    if (!isset($_POST[$field]) || empty($_POST[$field])) {
+                        throw new Exception("Missing required field: $field");
+                    }
+                }
+
+                $teacherData = [
+                    'name' => $_POST['name'],
+                    'username' => $_POST['username'],
+                    'email' => $_POST['email'],
+                    'phone' => $_POST['phone'],
+                    'password' => $_POST['password'],
+                    'subjects' => $_POST['subjects'] ?? '',
+                    'status' => $_POST['status'] ?? 'active'
+                ];
+
+                $result = $adminDb->addTeacher($teacherData);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Teacher added successfully'
+                ]);
+                break;
+
+            case 'update_teacher':
+                if (!isset($_POST['teacher_id'])) {
+                    throw new Exception('Teacher ID is required');
+                }
+
+                $teacherData = [
+                    'id' => $_POST['teacher_id'],
+                    'name' => $_POST['name'],
+                    'phone' => $_POST['phone'],
+                    'email' => $_POST['email'],
+                    'subjects' => $_POST['subjects'],
+                    'status' => $_POST['status']
+                ];
+
+                $result = $adminDb->updateTeacher($teacherData);
+                echo json_encode(['success' => true]);
+                break;
+
+            default:
+                throw new Exception('Invalid action');
+        }
+    } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        if (!isset($_GET['action'])) {
+            throw new Exception('No action specified');
+        }
+
+        if ($_GET['action'] === 'get_teacher' && isset($_GET['id'])) {
+            $teacher = $adminDb->getTeacherById($_GET['id']);
+            if ($teacher) {
+                echo json_encode(['success' => true, 'data' => $teacher]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Teacher not found']);
+            }
+        } else {
+            throw new Exception('Invalid action');
+        }
     }
-}
-?> 
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+} 

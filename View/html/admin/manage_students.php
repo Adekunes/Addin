@@ -76,6 +76,180 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                 opacity: 1;
             }
         }
+
+        .juz-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .current-juz {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .mastery-level {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .revision-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .revision-date {
+            color: #2c3e50;
+        }
+        
+        .revision-count {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .no-revision {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .form-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .form-section h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #6c757d;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: #2c3e50;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .history-section {
+            margin-bottom: 2rem;
+        }
+
+        .history-table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        .history-table th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .history-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .quality-indicator {
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.875rem;
+        }
+
+        .quality-excellent { background-color: #d4edda; color: #155724; }
+        .quality-good { background-color: #fff3cd; color: #856404; }
+        .quality-average { background-color: #fff3cd; color: #856404; }
+        .quality-needsWork { background-color: #f8d7da; color: #721c24; }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            color: #666;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 40px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 5px;
+            display: none;
+        }
+
+        .clear-search:hover {
+            color: #333;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -84,7 +258,10 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
     <div class="main-content">
         <div class="header">
             <div class="search-container">
-                <input type="text" placeholder="Search..." class="search-input">
+                <input type="text" id="studentSearch" placeholder="Search by name, guardian, or juz..." class="search-input">
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
             </div>
             <div class="user-info">
                 <div class="notifications">
@@ -100,11 +277,11 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
 
         <div class="content-header">
             <div class="title-section">
-                <h1>Users Management</h1>
-                <p>Manage all users and their roles</p>
+                <h1>Students Management</h1>
+                <p>Manage all students</p>
             </div>
             <button class="btn-primary" onclick="window.location.href='add_new_student.php'">
-                <i class="fas fa-plus"></i> Add User
+                <i class="fas fa-plus"></i> Add Student
             </button>
         </div>
 
@@ -114,9 +291,10 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                     <tr>
                         <th>Student Name</th>
                         <th>Guardian</th>
-                        <th>Latest Lesson</th>
+                        <th>Current Juz</th>
                         <th>Lines Memorized</th>
-                        <th>Surah Progress</th>
+                        <th>Juz Progress</th>
+                        <th>Last Revision</th>
                         <th>Quality</th>
                         <th>Tajweed</th>
                         <th>Status</th>
@@ -126,9 +304,12 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                 <tbody>
                     <?php if (empty($students)): ?>
                         <tr>
-                            <td colspan="11" class="no-data">No students found</td>
+                            <td colspan="11" class="no-data">No students available</td>
                         </tr>
                     <?php else: ?>
+                        <tr class="no-results" style="display: none;">
+                            <td colspan="11">No matching students found</td>
+                        </tr>
                         <?php foreach($students as $student): ?>
                             <tr>
                                 <td class="name-cell">
@@ -145,16 +326,9 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                                         <div class="user-contact"><?php echo htmlspecialchars($student['guardian_contact']); ?></div>
                                     </div>
                                 </td>
-                                <td>
-                                    <?php if(isset($student['lesson_date'])): ?>
-                                        <div class="lesson-info">
-                                            <div class="date"><?php echo date('Y-m-d', strtotime($student['lesson_date'])); ?></div>
-                                            <div class="surah"><?php echo htmlspecialchars($student['surah_name']); ?></div>
-                                            <div class="verses">Verses: <?php echo $student['verse_start']; ?>-<?php echo $student['verse_end']; ?></div>
-                                        </div>
-                                    <?php else: ?>
-                                        <span class="no-lesson">No lesson recorded</span>
-                                    <?php endif; ?>
+                                <td class="juz-info">
+                                    <div class="current-juz">Juz <?php echo htmlspecialchars($student['current_juz']); ?></div>
+                                    <div class="mastery-level"><?php echo ucfirst($student['mastery_level'] ?? 'Not Started'); ?></div>
                                 </td>
                                 <td>
                                     <div class="lines-info">
@@ -169,6 +343,16 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                                         </div>
                                         <span class="completion-text"><?php echo htmlspecialchars($student['completed_juz'] ?? '0'); ?>/30</span>
                                     </div>
+                                </td>
+                                <td class="revision-info">
+                                    <?php if(isset($student['last_revision_date'])): ?>
+                                        <div class="revision-date"><?php echo date('Y-m-d', strtotime($student['last_revision_date'])); ?></div>
+                                        <div class="revision-count">
+                                            Revisions: <?php echo $student['revision_count'] ?? 0; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="no-revision">No revisions</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <span class="quality-badge <?php echo strtolower($student['memorization_quality'] ?? 'none'); ?>">
@@ -200,14 +384,47 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
     <div id="editStudentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit Student Progress</h2>
+                <h2>Student Progress Management</h2>
                 <span class="close">&times;</span>
             </div>
+            <div class="modal-tabs">
+                <button class="tab-button active" data-tab="memorization">Memorization Progress</button>
+                <button class="tab-button" data-tab="revision">Daily Revision</button>
+                <button class="tab-button" data-tab="history">History</button>
+            </div>
             <div class="modal-body">
-                <form id="editStudentForm">
+                <form id="memorizationForm" class="tab-content active" data-tab="memorization">
                     <input type="hidden" id="studentId" name="student_id">
                     <input type="hidden" name="action" value="update_student">
                     
+                    <div class="form-section">
+                        <h3>Juz Progress</h3>
+                        <div class="form-group">
+                            <label for="currentJuz">Current Juz</label>
+                            <input type="number" id="currentJuz" name="currentJuz" min="1" max="30" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="masteryLevel">Mastery Level</label>
+                            <select id="masteryLevel" name="masteryLevel" required>
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="memorized">Memorized</option>
+                                <option value="mastered">Mastered</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memorizationQuality">Overall Memorization Quality</label>
+                        <select id="memorizationQuality" name="memorizationQuality" required>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="average">Average</option>
+                            <option value="needsWork">Needs Work</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="surahName">Surah Name</label>
                         <input type="text" id="surahName" name="surahName" required>
@@ -229,35 +446,11 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                     </div>
 
                     <div class="form-group">
-                        <label for="lessonDate">Lesson Date</label>
-                        <input type="date" id="lessonDate" name="lessonDate" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="memorizationQuality">Memorization Quality</label>
-                        <select id="memorizationQuality" name="memorizationQuality">
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="average">Average</option>
-                            <option value="needsWork">Needs Work</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="tajweedLevel">Tajweed Level</label>
-                        <select id="tajweedLevel" name="tajweedLevel">
+                        <select id="tajweedLevel" name="tajweedLevel" required>
                             <option value="beginner">Beginner</option>
                             <option value="intermediate">Intermediate</option>
                             <option value="advanced">Advanced</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="revisionStatus">Revision Status</label>
-                        <select id="revisionStatus" name="revisionStatus">
-                            <option value="onTrack">On Track</option>
-                            <option value="needsRevision">Needs Revision</option>
-                            <option value="behind">Behind Schedule</option>
                         </select>
                     </div>
 
@@ -271,8 +464,101 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                         <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                     </div>
                 </form>
+
+                <form id="revisionForm" class="tab-content" data-tab="revision">
+                    <input type="hidden" id="studentId" name="student_id">
+                    <input type="hidden" name="action" value="add_revision">
+                    
+                    <div class="form-section">
+                        <h3>Today's Revision</h3>
+                        <div class="form-group">
+                            <label for="revisionJuz">Juz Revised</label>
+                            <input type="number" id="juzRevised" name="juzRevised" min="1" max="30" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="revisionQuality">Revision Quality</label>
+                            <select id="revisionQuality" name="revisionQuality" required>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="average">Average</option>
+                                <option value="needsWork">Needs Work</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="revisionNotes">Revision Notes</label>
+                            <textarea id="revisionNotes" name="revisionNotes" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Record Revision</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    </div>
+                </form>
+
+                <div id="historyTab" class="tab-content" data-tab="history">
+                    <div class="history-section">
+                        <h3>Revision History</h3>
+                        <div class="history-table-container">
+                            <table class="history-table revision-history">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Juz</th>
+                                        <th>Quality</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="revisionHistoryBody">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <h3>Memorization Progress</h3>
+                        <div class="history-table-container">
+                            <table class="history-table memorization-history">
+                                <thead>
+                                    <tr>
+                                        <th>Juz</th>
+                                        <th>Status</th>
+                                        <th>Last Updated</th>
+                                        <th>Revisions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memorizationHistoryBody">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tab = button.dataset.tab;
+
+                    // Update active states
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    button.classList.add('active');
+                    document.querySelector(`.tab-content[data-tab="${tab}"]`).classList.add('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

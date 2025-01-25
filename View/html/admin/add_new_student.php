@@ -108,7 +108,7 @@ if ($editMode) {
     <div class="main-content">
         <h1><?php echo $editMode ? 'Edit Student' : 'Add New Student'; ?></h1>
         
-        <form id="studentForm" class="input-form" action="../../../model/auth/process_student.php" method="POST">
+        <form id="studentForm" class="input-form" method="POST">
             <input type="hidden" name="action" value="<?php echo $editMode ? 'update_student' : 'add_student'; ?>">
             <?php if ($editMode) { ?>
                 <input type="hidden" name="student_id" value="<?php echo $_GET['id']; ?>">

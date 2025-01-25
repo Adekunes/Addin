@@ -28,7 +28,28 @@ function viewTeacher(teacherId) {
 }
 
 function editTeacher(teacherId) {
-    window.location.href = `../../View/html/admin/add_new_teacher.php?id=${teacherId}&mode=edit`;
+    fetch(`../../../model/auth/process_teacher.php?action=get_teacher&id=${teacherId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const teacher = data.data;
+                document.getElementById('teacherId').value = teacher.id;
+                document.getElementById('teacherName').value = teacher.name;
+                document.getElementById('teacherPhone').value = teacher.phone;
+                document.getElementById('teacherEmail').value = teacher.email;
+                document.getElementById('teacherSubjects').value = teacher.subjects;
+                document.getElementById('teacherStatus').value = teacher.status;
+                
+                const modal = document.getElementById('editTeacherModal');
+                modal.style.display = 'block';
+            } else {
+                alert('Failed to load teacher data');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load teacher data');
+        });
 }
 
 function deleteTeacher(teacherId) {
@@ -108,4 +129,52 @@ function markFieldAsValid(input) {
     input.classList.remove('is-invalid');
     const feedback = input.parentNode.querySelector('.invalid-feedback');
     if (feedback) feedback.remove();
+}
+
+function closeModal() {
+    const modal = document.getElementById('editTeacherModal');
+    modal.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('editTeacherModal');
+    const form = document.getElementById('editTeacherForm');
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+    
+    // Handle form submission
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('../../../model/auth/process_teacher.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Teacher updated successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to update teacher'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the teacher');
+            }
+        });
+    }
+});
+
+function viewSchedule(teacherId) {
+    window.location.href = `teacher_schedule.php?id=${teacherId}`;
 }

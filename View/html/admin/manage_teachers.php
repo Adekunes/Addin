@@ -25,6 +25,114 @@ $teachers = $adminDb->getAllTeachers();
     <link rel="stylesheet" href="../../css/admin/styles.css">
     <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .main-content {
+            padding: 2rem;
+            margin-left: 250px;
+        }
+
+        .teachers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .teacher-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .teacher-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .teacher-info {
+            margin-bottom: 1rem;
+        }
+
+        .teacher-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .teacher-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .teacher-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-edit, .btn-schedule {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-edit {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-schedule {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-schedule:hover {
+            background-color: #27ae60;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <?php include '../../../components/php/admin_sidebar.php'; ?>
@@ -102,5 +210,50 @@ $teachers = $adminDb->getAllTeachers();
             }
         });
     </script>
+
+    <!-- Edit Teacher Modal -->
+    <div id="editTeacherModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Teacher</h2>
+            <form id="editTeacherForm">
+                <input type="hidden" id="teacherId" name="teacher_id">
+                <input type="hidden" name="action" value="update_teacher">
+                
+                <div class="form-group">
+                    <label for="teacherName">Name</label>
+                    <input type="text" id="teacherName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacherPhone">Phone</label>
+                    <input type="tel" id="teacherPhone" name="phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacherEmail">Email</label>
+                    <input type="email" id="teacherEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacherSubjects">Subjects</label>
+                    <input type="text" id="teacherSubjects" name="subjects">
+                </div>
+                
+                <div class="form-group">
+                    <label for="teacherStatus">Status</label>
+                    <select id="teacherStatus" name="status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Teacher</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

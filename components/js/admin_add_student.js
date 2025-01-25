@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('studentForm');
     
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Basic form validation
@@ -18,11 +18,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            if (isValid) {
-                // Submit the form
-                form.submit();
-            } else {
+            if (!isValid) {
                 alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('../../../model/auth/process_student.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message
+                    alert('Student added successfully!');
+                    // Force redirect to manage_students.php
+                    window.location.replace('manage_students.php');
+                    return false;
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to add student'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding the student');
             }
         });
     }
