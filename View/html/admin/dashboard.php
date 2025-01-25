@@ -1,5 +1,7 @@
 <?php
 session_start();
+// Update these paths to use the absolute path from the project root
+require_once '../../../model/config/config.php';
 require_once '../../../model/auth/admin_auth.php';
 
 // Check if user is logged in and is admin
@@ -7,6 +9,57 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../../login.php');
     exit();
 }
+
+function getDashboardStats() {
+    $stats = array();
+    
+    try {
+        $database = new Database();
+        $db = $database->getConnection();
+        
+        // Get total students
+        $query = "SELECT COUNT(*) as count FROM students";
+        $stmt = $db->query($query);
+        $stats['students'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        
+        // Get total teachers
+        $query = "SELECT COUNT(*) as count FROM teachers";
+        $stmt = $db->query($query);
+        $stats['teachers'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        
+        // Get today's attendance
+        $today = date('Y-m-d');
+        $query = "SELECT COUNT(DISTINCT student_id) as count 
+                  FROM progress 
+                  WHERE DATE(date) = :today";
+        $stmt = $db->prepare($query);
+        $stmt->execute([':today' => $today]);
+        $stats['attendance'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        
+        // Get active classes
+        $query = "SELECT COUNT(DISTINCT teacher_id) as count 
+                  FROM teachers";
+        $stmt = $db->query($query);
+        $stats['classes'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        
+        return $stats;
+    } catch(PDOException $e) {
+        error_log("Error getting dashboard stats: " . $e->getMessage());
+        error_log("Database error: " . $e->getMessage());
+        return array(
+            'students' => 0,
+            'teachers' => 0,
+            'attendance' => 0,
+            'classes' => 0
+        );
+    }
+}
+
+// Get the statistics
+$stats = getDashboardStats();
+
+// Debug output
+error_log("Dashboard stats: " . print_r($stats, true));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,6 +86,25 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 10px 0;
+            transition: opacity 0.3s ease;
+        }
+        .stat-number.updated {
+            animation: pulse 1s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -45,19 +117,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         <div class="dashboard-stats">
             <div class="stat-card">
                 <h3>Total Students</h3>
-                <div class="stat-number" id="totalStudents">Loading...</div>
+                <div class="stat-number" id="totalStudents"><?php echo $stats['students']; ?></div>
             </div>
             <div class="stat-card">
                 <h3>Total Teachers</h3>
-                <div class="stat-number" id="totalTeachers">Loading...</div>
+                <div class="stat-number" id="totalTeachers"><?php echo $stats['teachers']; ?></div>
             </div>
             <div class="stat-card">
                 <h3>Today's Attendance</h3>
-                <div class="stat-number" id="todayAttendance">Loading...</div>
+                <div class="stat-number" id="todayAttendance"><?php echo $stats['attendance']; ?></div>
             </div>
             <div class="stat-card">
                 <h3>Active Classes</h3>
-                <div class="stat-number" id="activeClasses">Loading...</div>
+                <div class="stat-number" id="activeClasses"><?php echo $stats['classes']; ?></div>
             </div>
         </div>
 

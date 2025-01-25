@@ -631,6 +631,83 @@ class AdminDatabase {
 
         return $events;
     }
+
+    public function getDashboardStats() {
+        try {
+            $stats = [];
+
+            // Check if tables exist before querying
+            $tables = $this->getExistingTables();
+            error_log("Existing tables: " . print_r($tables, true));
+
+            if (in_array('students', $tables)) {
+                $stats['total_students'] = $this->getTotalStudents();
+                error_log("Total students: " . $stats['total_students']);
+            }
+
+            if (in_array('teachers', $tables)) {
+                $stats['total_teachers'] = $this->getTotalTeachers();
+                error_log("Total teachers: " . $stats['total_teachers']);
+            }
+
+            if (in_array('progress', $tables)) {
+                $stats['today_attendance'] = $this->getTodayAttendance();
+                error_log("Today's attendance: " . $stats['today_attendance']);
+            }
+
+            if (in_array('teacher_schedule', $tables)) {
+                $stats['active_classes'] = $this->getActiveClasses();
+                error_log("Active classes: " . $stats['active_classes']);
+            }
+
+            return $stats;
+        } catch(PDOException $e) {
+            error_log("Error getting dashboard stats: " . $e->getMessage());
+            throw new Exception('Failed to get dashboard statistics');
+        }
+    }
+
+    private function getExistingTables() {
+        try {
+            $query = "SELECT TABLE_NAME 
+                     FROM information_schema.tables 
+                     WHERE table_schema = DATABASE()";
+            $stmt = $this->db->query($query);
+            $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            error_log("Found tables: " . print_r($tables, true));
+            return $tables;
+        } catch(PDOException $e) {
+            error_log("Error checking tables: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function getTotalStudents() {
+        $query = "SELECT COUNT(*) as count FROM students WHERE status = 'active'";
+        $stmt = $this->db->query($query);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    private function getTotalTeachers() {
+        $query = "SELECT COUNT(*) as count FROM teachers WHERE status = 'active'";
+        $stmt = $this->db->query($query);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    private function getTodayAttendance() {
+        $query = "SELECT COUNT(DISTINCT student_id) as count 
+                  FROM progress 
+                  WHERE DATE(date) = CURDATE()";
+        $stmt = $this->db->query($query);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    private function getActiveClasses() {
+        $query = "SELECT COUNT(*) as count FROM classes 
+                  WHERE status = 'active'";
+        $stmt = $this->db->query($query);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
 }
 
 ?> 
