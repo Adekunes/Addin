@@ -415,6 +415,50 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Add this to your existing JavaScript
+    const sabaqParaForm = document.getElementById('sabaqParaForm');
+    if (sabaqParaForm) {
+        sabaqParaForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            try {
+                const formData = new FormData(this);
+                
+                // Debug log the form data
+                const formDataObj = {};
+                formData.forEach((value, key) => {
+                    formDataObj[key] = value;
+                });
+                console.log('Submitting Sabaq Para form data:', formDataObj);
+                
+                const response = await fetch('../../../model/auth/process_student.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error response:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Server response:', result);
+                
+                if (result.success) {
+                    showNotification('Success', 'Sabaq Para updated successfully', 'success');
+                    if (typeof loadSabaqParaHistory === 'function') {
+                        loadSabaqParaHistory(formData.get('student_id'));
+                    }
+                } else {
+                    throw new Error(result.message || 'Failed to update Sabaq Para');
+                }
+            } catch (error) {
+                console.error('Error saving Sabaq Para:', error);
+                showNotification('Error', error.message, 'error');
+            }
+        });
+    }
 });
 
 // Function to open modal and populate form
@@ -449,7 +493,7 @@ async function openEditModal(studentId) {
         
         console.log('Received progress data:', progressData);
 
-        // Set student ID in form
+        // Set student ID in all forms
         const studentIdInputs = document.querySelectorAll('input[name="student_id"]');
         studentIdInputs.forEach(input => {
             input.value = studentId;
@@ -457,12 +501,18 @@ async function openEditModal(studentId) {
 
         // Set current juz and trigger change event
         const currentJuzSelect = document.getElementById('currentJuz');
+        const sabaqJuzSelect = document.getElementById('sabaqJuz');
+        
         if (currentJuzSelect && progressData.success && progressData.progress) {
-            currentJuzSelect.value = progressData.progress.current_juz;
-            // Trigger the change event manually
+            const currentJuz = progressData.progress.current_juz;
+            currentJuzSelect.value = currentJuz;
+            
+            // Sync the juz selection
+            syncJuzSelection();
+            
+            // Trigger change event
             const event = new Event('change');
             currentJuzSelect.dispatchEvent(event);
-            console.log('Triggered juz change event for:', progressData.progress.current_juz);
         }
 
         // Set memorization quality
@@ -499,11 +549,11 @@ async function openEditModal(studentId) {
         }
 
         // Load revision history
-        await loadStudentHistory(studentId);
+        await loadHistory(studentId);
 
     } catch (error) {
         console.error('Error in openEditModal:', error);
-        alert(error.message || 'Failed to load student data');
+        showNotification('Error', error.message || 'Failed to load student data', 'error');
         closeModal();
     }
 }
@@ -533,50 +583,130 @@ function deleteStudent(studentId) {
     }
 }
 
-async function loadStudentHistory(studentId) {
+async function loadHistory(studentId) {
     try {
-        console.log('Loading history for student:', studentId);
-        
         const response = await fetch(`../../../model/auth/process_student.php?action=get_student_history&student_id=${studentId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         const data = await response.json();
-        console.log('Received history data:', data);
+        
+        if (data.success && data.revisions) {
+            // Group revisions by type
+            const groupedRevisions = {
+                progress: [],
+                revision: [],
+                sabaq_para: []
+            };
+            
+            data.revisions.forEach(entry => {
+                if (groupedRevisions[entry.source]) {
+                    groupedRevisions[entry.source].push(entry);
+                }
+            });
+            
+            // Create HTML for each section
+            const sectionsHtml = `
+                <div class="history-sections">
+                    <div class="history-section">
+                        <h3>Daily Progress</h3>
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Juz</th>
+                                        <th>Surah</th>
+                                        <th>Ayat Range</th>
+                                        <th>Verses Memorized</th>
+                                        <th>Quality</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${groupedRevisions.progress.map(entry => {
+                                        const versesMemorized = entry.end_ayat && entry.start_ayat ? 
+                                            (parseInt(entry.end_ayat) - parseInt(entry.start_ayat) + 1) : 
+                                            '-';
+                                        const ayatRange = entry.start_ayat && entry.end_ayat ? 
+                                            `${entry.start_ayat} - ${entry.end_ayat}` : 
+                                            '-';
+                                        return `
+                                            <tr>
+                                                <td>${entry.revision_date}</td>
+                                                <td>Juz ${entry.juz_revised}</td>
+                                                <td>${entry.current_surah || '-'}</td>
+                                                <td>${ayatRange}</td>
+                                                <td>${versesMemorized}</td>
+                                                <td>${getQualityBadgeHtml(entry.quality_rating)}</td>
+                                                <td>${entry.teacher_notes || '-'}</td>
+                                            </tr>
+                                        `;
+                                    }).join('') || '<tr><td colspan="7" class="no-data">No progress records found</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-        const historyBody = document.getElementById('revisionHistoryBody');
-        if (!historyBody) {
-            console.error('History table body element not found');
-            return;
+                    <div class="history-section">
+                        <h3>Sabaq Para Records</h3>
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Juz</th>
+                                        <th>Quality</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${groupedRevisions.sabaq_para.map(entry => `
+                                        <tr>
+                                            <td>${entry.revision_date}</td>
+                                            <td>Juz ${entry.juz_revised}</td>
+                                            <td><span class="quality-badge ${entry.quality_rating.toLowerCase()}">${entry.quality_rating}</span></td>
+                                            <td>${entry.teacher_notes || '-'}</td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="4" class="no-data">No sabaq para records found</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <h3>Revision Records</h3>
+                        <div class="history-table-container">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Juz</th>
+                                        <th>Quality</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${groupedRevisions.revision.map(entry => `
+                                        <tr>
+                                            <td>${entry.revision_date}</td>
+                                            <td>Juz ${entry.juz_revised}</td>
+                                            <td>${getQualityBadgeHtml(entry.quality_rating)}</td>
+                                            <td>${entry.teacher_notes || '-'}</td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="4" class="no-data">No revision records found</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const historyTab = document.querySelector('.tab-content[data-tab="history"]');
+            if (historyTab) {
+                historyTab.innerHTML = sectionsHtml;
+            }
         }
-
-        if (data.success && data.revisions && data.revisions.length > 0) {
-            historyBody.innerHTML = data.revisions.map(revision => {
-                const quality = revision.quality_rating || 'average';
-                return `
-                    <tr>
-                        <td>${new Date(revision.revision_date).toLocaleDateString()}</td>
-                        <td>Juz ${revision.juz_revised}</td>
-                        <td>
-                            <span class="quality-indicator quality-${quality.toLowerCase()}">
-                                ${quality}
-                            </span>
-                        </td>
-                        <td>${revision.teacher_notes || '-'}</td>
-                    </tr>
-                `;
-            }).join('');
-        } else {
-            historyBody.innerHTML = '<tr><td colspan="4" class="text-center">No revision history available</td></tr>';
-        }
-
     } catch (error) {
-        console.error('Error loading student history:', error);
-        const historyBody = document.getElementById('revisionHistoryBody');
-        if (historyBody) {
-            historyBody.innerHTML = '<tr><td colspan="4" class="text-center text-error">Failed to load revision history</td></tr>';
-        }
+        console.error('Error loading history:', error);
+        showNotification('Error', 'Failed to load history', 'error');
     }
 }
 
@@ -774,4 +904,171 @@ function populateAyatOptions(surahSelect, startAyatSelect, endAyatSelect) {
     } else {
         console.warn('No surah selected');
     }
+}
+
+// Make sure we have all required elements
+document.addEventListener('DOMContentLoaded', function() {
+    const currentSurahSelect = document.getElementById('currentSurah');
+    const startAyatSelect = document.getElementById('startAyat');
+    const endAyatSelect = document.getElementById('endAyat');
+    
+    console.log('Elements found:', {
+        currentSurahSelect: !!currentSurahSelect,
+        startAyatSelect: !!startAyatSelect,
+        endAyatSelect: !!endAyatSelect
+    });
+    
+    if (currentSurahSelect && startAyatSelect && endAyatSelect) {
+        // Add click event listeners to ayat selects
+        startAyatSelect.addEventListener('click', function(e) {
+            console.log('Start ayat clicked');
+            console.log('Current options:', this.options.length);
+            if (this.options.length <= 1) {
+                populateAyatOptions(currentSurahSelect, startAyatSelect, endAyatSelect);
+            }
+        });
+        
+        endAyatSelect.addEventListener('click', function(e) {
+            console.log('End ayat clicked');
+            console.log('Current options:', this.options.length);
+            if (this.options.length <= 1) {
+                populateAyatOptions(currentSurahSelect, startAyatSelect, endAyatSelect);
+            }
+        });
+        
+        // Also add change event to surah select to update ayat ranges
+        currentSurahSelect.addEventListener('change', function() {
+            console.log('Surah changed to:', this.value);
+            startAyatSelect.innerHTML = '<option value="">Select Starting Ayat</option>';
+            endAyatSelect.innerHTML = '<option value="">Select Ending Ayat</option>';
+        });
+    } else {
+        console.error('One or more required elements not found');
+    }
+});
+
+// Function to load Sabaq Para history
+async function loadSabaqParaHistory(studentId) {
+    try {
+        const response = await fetch(`../../../model/auth/process_student.php?action=get_sabaq_para_history&student_id=${studentId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const historyHtml = data.history.map(entry => `
+                <tr>
+                    <td>${entry.revision_date}</td>
+                    <td>Juz ${entry.juz_number}</td>
+                    <td>${entry.quarters_revised.replace('_', ' ')}</td>
+                    <td>${entry.quality_rating}</td>
+                    <td>${entry.teacher_notes || ''}</td>
+                </tr>
+            `).join('');
+            
+            // Add this section to your history tab
+            const historySection = document.createElement('div');
+            historySection.className = 'history-section';
+            historySection.innerHTML = `
+                <h3>Sabaq Para History</h3>
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Juz</th>
+                                <th>Quarters</th>
+                                <th>Quality</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${historyHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Find the history tab content and append this section
+            const historyTab = document.querySelector('.tab-content[data-tab="history"]');
+            if (historyTab) {
+                historyTab.appendChild(historySection);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading Sabaq Para history:', error);
+    }
+}
+
+// Add this function to sync the juz selection
+function syncJuzSelection() {
+    const currentJuzSelect = document.getElementById('currentJuz');
+    const sabaqJuzSelect = document.getElementById('sabaqJuz');
+    
+    if (currentJuzSelect && sabaqJuzSelect) {
+        const currentJuzValue = currentJuzSelect.value;
+        if (currentJuzValue) {
+            sabaqJuzSelect.value = currentJuzValue;
+            console.log('Synced Sabaq Para juz to:', currentJuzValue);
+        }
+    }
+}
+
+// Add tab switching logic with juz sync
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        
+        // If switching to sabaq-para tab, sync the juz
+        if (tab === 'sabaq-para') {
+            syncJuzSelection();
+        }
+        
+        // Existing tab switching logic
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        this.classList.add('active');
+        document.querySelector(`.tab-content[data-tab="${tab}"]`).classList.add('active');
+    });
+});
+
+// Update the quality rating mapping in loadHistory function
+function getQualityBadgeHtml(quality) {
+    if (!quality) {
+        return '<span class="quality-badge not-rated">Not Rated</span>';
+    }
+    return `<span class="quality-badge ${quality.toLowerCase()}">${quality}</span>`;
+}
+
+function updateStudent(studentId) {
+    const form = document.getElementById('editStudentForm');
+    const formData = new FormData(form);
+    
+    // Debug log
+    console.log('Updating student with data:', Object.fromEntries(formData));
+
+    fetch('../../../model/auth/process_student.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Server response:', data); // Debug log
+        
+        if (data.success) {
+            alert('Student updated successfully!');
+            // Reload the page to show updated data
+            window.location.reload();
+        } else {
+            throw new Error(data.message || 'Failed to update student');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update student: ' + error.message);
+    });
 }

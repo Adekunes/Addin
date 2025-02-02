@@ -12,6 +12,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 // Get all teachers from database
 $adminDb = new AdminDatabase();
 $teachers = $adminDb->getAllTeachers();
+
+error_log("Teachers data: " . print_r($teachers, true));
+
 ?>
 
 <!DOCTYPE html>
@@ -163,37 +166,50 @@ $teachers = $adminDb->getAllTeachers();
         </div>
 
         <div class="teachers-grid">
-            <?php if (empty($teachers)): ?>
+            <?php 
+            if ($teachers && is_array($teachers) && count($teachers) > 0): 
+                foreach($teachers as $teacher): 
+            ?>
+                <div class="teacher-card">
+                    <div class="teacher-header">
+                        <div class="status-badge <?php echo strtolower($teacher['status'] ?? 'inactive'); ?>">
+                            <?php echo ucfirst($teacher['status'] ?? 'Inactive'); ?>
+                        </div>
+                    </div>
+                    
+                    <div class="teacher-info">
+                        <h3><?php echo htmlspecialchars($teacher['name'] ?? 'Unknown'); ?></h3>
+                        <p class="subject">
+                            <i class="fas fa-book"></i> 
+                            <?php echo htmlspecialchars($teacher['subjects'] ?? 'Not specified'); ?>
+                        </p>
+                        <p class="email">
+                            <i class="fas fa-envelope"></i> 
+                            <?php echo htmlspecialchars($teacher['email'] ?? 'No email'); ?>
+                        </p>
+                        <p class="phone">
+                            <i class="fas fa-phone"></i> 
+                            <?php echo htmlspecialchars($teacher['phone'] ?? 'No phone'); ?>
+                        </p>
+                    </div>
+
+                    <div class="teacher-actions">
+                        <button class="btn-schedule" onclick="viewSchedule(<?php echo $teacher['id']; ?>)">
+                            <i class="fas fa-calendar"></i> Schedule
+                        </button>
+                        <button class="btn-edit" onclick="editTeacher('<?php echo $teacher['teacher_id'] ?? $teacher['id']; ?>')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                </div>
+            <?php 
+                endforeach;
+            else: 
+            ?>
                 <div class="no-teachers">
                     <p>No teachers found. Click the "Add Teacher" button to add your first teacher.</p>
                 </div>
-            <?php else: 
-                foreach($teachers as $teacher): ?>
-                    <div class="teacher-card">
-                        <div class="teacher-header">
-                            <div class="status-badge <?php echo strtolower($teacher['status']); ?>">
-                                <?php echo ucfirst($teacher['status']); ?>
-                            </div>
-                        </div>
-                        
-                        <div class="teacher-info">
-                            <h3><?php echo htmlspecialchars($teacher['name']); ?></h3>
-                            <p class="subject"><i class="fas fa-book"></i> <?php echo htmlspecialchars($teacher['subjects']); ?></p>
-                            <p class="email"><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($teacher['email']); ?></p>
-                            <p class="phone"><i class="fas fa-phone"></i> <?php echo htmlspecialchars($teacher['phone']); ?></p>
-                        </div>
-
-                        <div class="teacher-actions">
-                            <button class="btn-schedule" onclick="viewSchedule(<?php echo $teacher['id']; ?>)">
-                                <i class="fas fa-calendar"></i> Schedule
-                            </button>
-                            <button class="btn-edit" onclick="editTeacher(<?php echo $teacher['id']; ?>)">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </div>
-                    </div>
-                <?php endforeach;
-            endif; ?>
+            <?php endif; ?>
         </div>
     </div>
 

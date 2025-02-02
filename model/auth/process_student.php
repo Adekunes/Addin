@@ -83,34 +83,27 @@ try {
 
         case 'update_student':
             try {
-                // Validate and sanitize input
-                $studentId = filter_input(INPUT_POST, 'student_id', FILTER_SANITIZE_NUMBER_INT);
-                $currentJuz = filter_input(INPUT_POST, 'currentJuz', FILTER_SANITIZE_NUMBER_INT);
-                $currentSurah = filter_input(INPUT_POST, 'currentSurah', FILTER_SANITIZE_NUMBER_INT);
-                $startAyat = filter_input(INPUT_POST, 'start_ayat', FILTER_SANITIZE_NUMBER_INT);
-                $endAyat = filter_input(INPUT_POST, 'end_ayat', FILTER_SANITIZE_NUMBER_INT);
-                $memorizationQuality = filter_input(INPUT_POST, 'memorizationQuality', FILTER_SANITIZE_STRING);
-                $teacherNotes = filter_input(INPUT_POST, 'teacherNotes', FILTER_SANITIZE_STRING);
+                // Log the incoming data
+                error_log("Updating student with data: " . print_r($_POST, true));
                 
-                // Update progress
-                $result = $adminDb->updateStudentProgress(
-                    $studentId, 
-                    $currentJuz, 
-                    $currentSurah,
-                    $startAyat,
-                    $endAyat,
-                    $memorizationQuality,
-                    $teacherNotes
-                );
+                // Validate required fields
+                $requiredFields = ['id', 'name', 'guardian_name', 'guardian_contact', 'status', 'class_id'];
+                foreach ($requiredFields as $field) {
+                    if (!isset($_POST[$field]) || empty($_POST[$field])) {
+                        throw new Exception("Missing required field: $field");
+                    }
+                }
                 
-                echo json_encode($result);
+                $result = $adminDb->updateStudent($_POST);
                 
+                if ($result) {
+                    echo json_encode(['success' => true, 'message' => 'Student updated successfully']);
+                } else {
+                    throw new Exception("Failed to update student");
+                }
             } catch (Exception $e) {
-                error_log("Error updating student: " . $e->getMessage());
-                echo json_encode([
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ]);
+                error_log("Error in process_student.php: " . $e->getMessage());
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
             }
             break;
 
@@ -251,6 +244,48 @@ try {
                 
             } catch (Exception $e) {
                 error_log("Error getting surahs: " . $e->getMessage());
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'add_sabaq_para':
+            try {
+                $studentId = filter_input(INPUT_POST, 'student_id', FILTER_SANITIZE_NUMBER_INT);
+                $juzNumber = filter_input(INPUT_POST, 'sabaqJuz', FILTER_SANITIZE_NUMBER_INT);
+                $quartersRevised = filter_input(INPUT_POST, 'quartersRevised', FILTER_SANITIZE_STRING);
+                $qualityRating = filter_input(INPUT_POST, 'sabaqQuality', FILTER_SANITIZE_STRING);
+                $notes = filter_input(INPUT_POST, 'sabaqNotes', FILTER_SANITIZE_STRING);
+                
+                $result = $adminDb->addSabaqPara(
+                    $studentId,
+                    $juzNumber,
+                    $quartersRevised,
+                    $qualityRating,
+                    $notes
+                );
+                
+                echo json_encode($result);
+                
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'get_sabaq_para_history':
+            try {
+                $studentId = filter_input(INPUT_GET, 'student_id', FILTER_SANITIZE_NUMBER_INT);
+                $history = $adminDb->getSabaqParaHistory($studentId);
+                echo json_encode([
+                    'success' => true,
+                    'history' => $history
+                ]);
+            } catch (Exception $e) {
                 echo json_encode([
                     'success' => false,
                     'message' => $e->getMessage()

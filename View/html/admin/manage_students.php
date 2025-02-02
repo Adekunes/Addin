@@ -403,6 +403,111 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
 .form-group select::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+/* History Tab Styling */
+.history-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.history-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.history-section h3 {
+    background: #f8f9fa;
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.history-table-container {
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.history-table th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.history-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    color: #212529;
+}
+
+.history-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.quality-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.quality-badge.excellent {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.quality-badge.good {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.quality-badge.average {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.quality-badge.needswork {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.quality-badge.horrible {
+    background-color: #dc3545;
+    color: white;
+}
+
+.no-data {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 2rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .history-table th, 
+    .history-table td {
+        padding: 8px;
+    }
+    
+    .quality-badge {
+        padding: 2px 6px;
+        font-size: 0.8em;
+    }
+}
     </style>
 </head>
 <body>
@@ -521,6 +626,7 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
             <div class="modal-tabs">
                 <button class="tab-button active" data-tab="memorization">Memorization Progress</button>
                 <button class="tab-button" data-tab="revision">Daily Revision</button>
+                <button class="tab-button" data-tab="sabaq-para">Sabaq Para</button>
                 <button class="tab-button" data-tab="history">History</button>
             </div>
             <div class="modal-body">
@@ -619,6 +725,56 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Record Revision</button>
                         <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    </div>
+                </form>
+
+                <form id="sabaqParaForm" class="tab-content" data-tab="sabaq-para">
+                    <input type="hidden" name="student_id" value="">
+                    <input type="hidden" name="action" value="add_sabaq_para">
+                    
+                    <div class="form-section">
+                        <h3>Sabaq Para (Short Term Revision)</h3>
+                        <div class="form-group">
+                            <label for="sabaqJuz">Juz Number</label>
+                            <select id="sabaqJuz" name="sabaqJuz" required>
+                                <option value="">Select Juz</option>
+                                <?php for($i = 1; $i <= 30; $i++): ?>
+                                    <option value="<?php echo $i; ?>">Juz <?php echo $i; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="quartersRevised">Quarters Revised</label>
+                            <select id="quartersRevised" name="quartersRevised" required>
+                                <option value="">Select Quarters</option>
+                                <option value="1st_quarter">First Quarter</option>
+                                <option value="2_quarters">Two Quarters</option>
+                                <option value="3_quarters">Three Quarters</option>
+                                <option value="4_quarters">Full Juz</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sabaqQuality">Quality Rating</label>
+                            <select id="sabaqQuality" name="sabaqQuality" required>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="average">Average</option>
+                                <option value="needsWork">Needs Work</option>
+                                <option value="horrible">Horrible</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sabaqNotes">Notes</label>
+                            <textarea id="sabaqNotes" name="sabaqNotes" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Sabaq Para</button>
+                            <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        </div>
                     </div>
                 </form>
 

@@ -11,19 +11,28 @@ class AdminDatabase {
 
     public function getAllTeachers() {
         try {
-            $query = "SELECT t.teacher_id as id, t.name, t.phone, t.subjects, t.status, 
-                      u.email, u.username 
-                      FROM teachers t 
-                      JOIN users u ON t.user_id = u.id 
-                      WHERE u.role = 'teacher' 
-                      ORDER BY t.name ASC";
-                      
+            $query = "SELECT 
+                t.id,
+                t.name,
+                t.phone,
+                t.subjects,
+                t.status,
+                u.email,
+                u.username
+                FROM teachers t
+                JOIN users u ON t.user_id = u.id
+                WHERE status = 'active'
+                ORDER BY t.name ASC";
+            
+
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Found " . count($result) . " teachers");
+            return $result;
         } catch(PDOException $e) {
-            error_log("Error fetching teachers: " . $e->getMessage());
+            error_log("Error in getAllTeachers: " . $e->getMessage());
             return [];
         }
     }
@@ -109,47 +118,55 @@ class AdminDatabase {
 
     public function updateStudent($data) {
         try {
-            // Check if we're updating progress or full student data
-            if (isset($data['current_juz'])) {
-                // Updating progress
-                $query = "UPDATE students 
-                          SET current_juz = :current_juz,
-                              completed_juz = :completed_juz,
-                              status = :status
-                          WHERE id = :id";
+            $this->db->beginTransaction();
+            
+            // Update student table
+            $query = "UPDATE students 
+                     SET name = :name,
+                         guardian_name = :guardian_name,
+                         guardian_contact = :guardian_contact,
+                         status = :status,
+                         class_id = :class_id,
+                         updated_at = CURRENT_TIMESTAMP
+                     WHERE id = :student_id";
+            
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([
+                ':student_id' => $data['id'],
+                ':name' => $data['name'],
+                ':guardian_name' => $data['guardian_name'],
+                ':guardian_contact' => $data['guardian_contact'],
+                ':status' => $data['status'],
+                ':class_id' => $data['class_id']
+            ]);
+            
+            if (!$result) {
+                throw new Exception("Failed to update student record");
+            }
+
+            // Update user email if it exists
+            if (isset($data['email'])) {
+                $query = "UPDATE users u
+                          JOIN students s ON u.id = s.user_id
+                          SET u.email = :email
+                          WHERE s.id = :student_id";
                 
                 $stmt = $this->db->prepare($query);
-                return $stmt->execute([
-                    ':id' => $data['id'],
-                    ':current_juz' => $data['current_juz'],
-                    ':completed_juz' => $data['completed_juz'],
-                    ':status' => $data['status']
-                ]);
-            } else {
-                // Updating student information
-                $query = "UPDATE students 
-                          SET name = :name,
-                              date_of_birth = :date_of_birth,
-                              guardian_name = :guardian_name,
-                              guardian_contact = :guardian_contact,
-                              enrollment_date = :enrollment_date,
-                              status = :status
-                          WHERE id = :id";
-                
-                $stmt = $this->db->prepare($query);
-                return $stmt->execute([
-                    ':id' => $data['id'],
-                    ':name' => $data['name'],
-                    ':date_of_birth' => $data['date_of_birth'],
-                    ':guardian_name' => $data['guardian_name'],
-                    ':guardian_contact' => $data['guardian_contact'],
-                    ':enrollment_date' => $data['enrollment_date'],
-                    ':status' => $data['status']
+                $stmt->execute([
+                    ':student_id' => $data['id'],
+                    ':email' => $data['email']
                 ]);
             }
-        } catch(PDOException $e) {
+
+            $this->db->commit();
+            error_log("Student update successful for ID: " . $data['id']);
+            return true;
+
+        } catch(Exception $e) {
+            $this->db->rollBack();
             error_log("Error updating student: " . $e->getMessage());
-            return false;
+            error_log("Update data: " . print_r($data, true));
+            throw new Exception('Failed to update student: ' . $e->getMessage());
         }
     }
 
@@ -452,12 +469,14 @@ class AdminDatabase {
 
     public function getStudentHistory($studentId) {
         try {
-            error_log("Fetching history for student ID: " . $studentId);
-
             $query = "SELECT 
                         'progress' as source,
                         date as revision_date,
                         current_juz as juz_revised,
+                        current_surah,
+                        start_ayat,
+                        end_ayat,
+                        verses_memorized,
                         memorization_quality as quality_rating,
                         teacher_notes
                      FROM progress 
@@ -469,9 +488,28 @@ class AdminDatabase {
                         'revision' as source,
                         revision_date,
                         juz_revised,
+                        NULL as current_surah,
+                        NULL as start_ayat,
+                        NULL as end_ayat,
+                        NULL as verses_memorized,
                         memorization_quality,
                         teacher_notes
                      FROM juz_revisions
+                     WHERE student_id = :student_id
+                     
+                     UNION ALL
+                     
+                     SELECT 
+                        'sabaq_para' as source,
+                        revision_date,
+                        juz_number as juz_revised,
+                        NULL as current_surah,
+                        NULL as start_ayat,
+                        NULL as end_ayat,
+                        NULL as verses_memorized,
+                        quality_rating,
+                        CONCAT('Quarters Revised: ', quarters_revised, ' - ', teacher_notes) as teacher_notes
+                     FROM sabaq_para
                      WHERE student_id = :student_id
                      
                      ORDER BY revision_date DESC, source DESC
@@ -481,9 +519,6 @@ class AdminDatabase {
             $stmt->execute([':student_id' => $studentId]);
             $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            error_log("Found " . count($history) . " history records");
-            error_log("History data: " . print_r($history, true));
-
             return [
                 'success' => true,
                 'revisions' => $history
@@ -491,7 +526,6 @@ class AdminDatabase {
 
         } catch(PDOException $e) {
             error_log("Database error in getStudentHistory: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
             return [
                 'success' => false,
                 'message' => "Failed to fetch history: " . $e->getMessage()
@@ -506,7 +540,7 @@ class AdminDatabase {
                           phone = :phone,
                           subjects = :subjects,
                           status = :status
-                      WHERE teacher_id = :id";
+                      WHERE id = :id";
             
             $stmt = $this->db->prepare($query);
             $stmt->execute([
@@ -521,7 +555,7 @@ class AdminDatabase {
             $query = "UPDATE users u
                       JOIN teachers t ON u.id = t.user_id
                       SET u.email = :email
-                      WHERE t.teacher_id = :id";
+                      WHERE t.id = :id";
             
             $stmt = $this->db->prepare($query);
             $stmt->execute([
@@ -538,19 +572,19 @@ class AdminDatabase {
 
     public function getTeacherById($id) {
         try {
-            $query = "SELECT t.teacher_id as id, t.name, t.phone, t.subjects, t.status,
+            $query = "SELECT t.id, t.name, t.phone, t.subjects, t.status,
                              u.email, u.username
                       FROM teachers t
                       JOIN users u ON t.user_id = u.id
-                      WHERE t.teacher_id = :id";
+                      WHERE t.id = :id";
             
             $stmt = $this->db->prepare($query);
             $stmt->execute([':id' => $id]);
             
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch(PDOException $e) {
-            error_log("Error fetching teacher: " . $e->getMessage());
-            return null;
+            error_log("Error in getTeacherById: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -602,14 +636,14 @@ class AdminDatabase {
 
             foreach ($data['times'] as $time) {
                 $query = "INSERT INTO teacher_schedule 
-                         (teacher_id, day_of_week, time_slot) 
-                         VALUES (:teacher_id, :day, :time)
+                         (id, day_of_week, time_slot) 
+                         VALUES (:id, :day, :time)
                          ON DUPLICATE KEY UPDATE 
                          updated_at = CURRENT_TIMESTAMP";
                  
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([
-                    ':teacher_id' => $data['teacher_id'],
+                    ':id' => $data['id'],
                     ':day' => $data['day'],
                     ':time' => $time
                 ]);
@@ -627,11 +661,11 @@ class AdminDatabase {
     public function getTeacherSchedule($teacherId) {
         try {
             $query = "SELECT * FROM teacher_schedule 
-                      WHERE teacher_id = :teacher_id 
+                      WHERE id = :id 
                       ORDER BY day_of_week, time_slot";
               
             $stmt = $this->db->prepare($query);
-            $stmt->execute([':teacher_id' => $teacherId]);
+            $stmt->execute([':id' => $teacherId]);
             
             $schedules = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $this->formatScheduleEvents($schedules);
@@ -912,6 +946,53 @@ class AdminDatabase {
             return [
                 'success' => false,
                 'message' => "Failed to update progress: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function addSabaqPara($studentId, $juzNumber, $quartersRevised, $qualityRating, $notes) {
+        try {
+            // Validate inputs
+            if (!$studentId || !$juzNumber || !$quartersRevised || !$qualityRating) {
+                throw new Exception("All required fields must be provided");
+            }
+
+            // Insert the sabaq para record
+            $query = "INSERT INTO sabaq_para 
+                        (student_id, juz_number, quarters_revised, quality_rating, teacher_notes, revision_date) 
+                     VALUES 
+                        (:student_id, :juz_number, :quarters_revised, :quality_rating, :notes, CURRENT_DATE)";
+            
+            $stmt = $this->db->prepare($query);
+            $params = [
+                ':student_id' => $studentId,
+                ':juz_number' => $juzNumber,
+                ':quarters_revised' => $quartersRevised,
+                ':quality_rating' => $qualityRating,
+                ':notes' => $notes
+            ];
+
+            // Log the query and parameters for debugging
+            error_log("Adding Sabaq Para with params: " . print_r($params, true));
+            
+            $stmt->execute($params);
+            
+            return [
+                'success' => true,
+                'message' => 'Sabaq Para record added successfully'
+            ];
+            
+        } catch(PDOException $e) {
+            error_log("Database error in addSabaqPara: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Database error: " . $e->getMessage()
+            ];
+        } catch(Exception $e) {
+            error_log("Error in addSabaqPara: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
             ];
         }
     }

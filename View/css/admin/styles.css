@@ -433,7 +433,7 @@ tr:hover {
     padding: 25px;
     border-radius: 8px;
     width: 90%;
-    max-width: 600px;
+    max-width: 800px;
     position: relative;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     animation: modalFadeIn 0.3s; /* Smooth fade in animation */
@@ -542,4 +542,347 @@ tr:hover {
 .table-responsive {
     margin: 20px 0;
     overflow-x: auto;
+}
+
+/* Tablet-specific styles for manage students page (768px - 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    /* Layout structure */
+    .main-content {
+        margin-left: 80px;
+        padding: 1rem;
+        width: calc(100% - 80px);
+    }
+
+    /* Table container */
+    .table-container {
+        margin: 1rem 0;
+        padding: 1rem;
+        overflow-x: auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Table styling */
+    table {
+        min-width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    th {
+        background: #f8f9fa;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-size: 0.85rem;
+    }
+
+    /* Student info cells */
+    .name-cell {
+        min-width: 200px;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .user-icon {
+        min-width: 40px;
+        height: 40px;
+    }
+
+    .user-details {
+        min-width: 150px;
+    }
+
+    /* Action buttons */
+    .actions {
+        display: flex;
+        gap: 8px;
+        min-width: 100px;
+    }
+
+    .btn-icon {
+        padding: 8px;
+        font-size: 1.1rem;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        width: 90%;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        height: auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-tabs {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding: 10px 0;
+        margin-bottom: 15px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-button {
+        padding: 10px 15px;
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+
+    /* Form elements */
+    .form-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    /* Search and filter section */
+    .search-filter {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* History tables */
+    .history-table-container {
+        margin: 10px 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .history-table {
+        min-width: 600px;
+    }
+
+    /* Quality badges */
+    .quality-badge,
+    .status-badge {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .main-content {
+        margin-left: 80px;
+    }
+
+    .modal-content {
+        max-height: 85vh;
+    }
+
+    .table-container {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+    }
+}
+
+/* Teachers Grid Layout */
+.teachers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+/* Teacher Card Styles */
+.teacher-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.teacher-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.teacher-info {
+    flex: 1;
+}
+
+.teacher-info h3 {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.teacher-info p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+}
+
+.teacher-info i {
+    width: 20px;
+    color: #006B4D;
+}
+
+.teacher-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background-color: #DEF7EC;
+    color: #03543F;
+}
+
+.status-badge.inactive {
+    background-color: #FDE8E8;
+    color: #9B1C1C;
+}
+
+.btn-schedule,
+.btn-edit {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-schedule {
+    background-color: #006B4D;
+    color: white;
+}
+
+.btn-edit {
+    background-color: #3B82F6;
+    color: white;
+}
+
+.btn-schedule:hover {
+    background-color: #005540;
+}
+
+.btn-edit:hover {
+    background-color: #2563EB;
+}
+
+/* Tablet-specific adjustments */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .teachers-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .teacher-card {
+        padding: 1.25rem;
+    }
+
+    .main-content {
+        margin-left: 80px;
+        padding: 1rem;
+    }
+
+    .teacher-info h3 {
+        font-size: 1.1rem;
+    }
+
+    .teacher-info p {
+        font-size: 0.9rem;
+    }
+
+    .teacher-actions {
+        flex-wrap: wrap;
+    }
+
+    .btn-schedule,
+    .btn-edit {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Content header styles */
+.content-header {
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.content-header h1 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.content-header p {
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.btn-primary {
+    background-color: #006B4D;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #005540;
+}
+
+/* No teachers message */
+.no-teachers {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    color: #6b7280;
 }

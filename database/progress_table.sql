@@ -224,3 +224,17 @@ INSERT INTO juz (juz_number, surah_list) VALUES
 (28, '58, 59, 60, 61, 62, 63, 64, 65, 66'),
 (29, '67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77'),
 (30, '78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114');
+
+-- Create table for sabaq para (short term revision)
+CREATE TABLE sabaq_para (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    juz_number INT NOT NULL,
+    quarters_revised ENUM('1st_quarter', '2_quarters', '3_quarters', '4_quarters') NOT NULL,
+    revision_date DATE NOT NULL,
+    quality_rating ENUM('excellent', 'good', 'average', 'needsWork', 'horrible') NOT NULL,
+    teacher_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    INDEX idx_student_juz (student_id, juz_number)
+);
