@@ -4,6 +4,9 @@ session_start();
 require_once '../../../model/config/config.php';
 require_once '../../../model/auth/admin_auth.php';
 
+// Add debugging
+error_log("Dashboard loaded - Starting debug");
+
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../../login.php');
@@ -17,15 +20,22 @@ function getDashboardStats() {
         $database = new Database();
         $db = $database->getConnection();
         
-        // Get total students
+        // Debug database connection
+        error_log("Database connection established");
+        
+        // Get total students with debug
         $query = "SELECT COUNT(*) as count FROM students";
         $stmt = $db->query($query);
-        $stats['students'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        $studentCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        error_log("Student count query executed. Result: " . $studentCount);
+        $stats['students'] = $studentCount;
         
-        // Get total teachers
+        // Get total teachers with debug
         $query = "SELECT COUNT(*) as count FROM teachers";
         $stmt = $db->query($query);
-        $stats['teachers'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        $teacherCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        error_log("Teacher count query executed. Result: " . $teacherCount);
+        $stats['teachers'] = $teacherCount;
         
         // Get today's attendance
         $today = date('Y-m-d');
@@ -44,8 +54,7 @@ function getDashboardStats() {
         
         return $stats;
     } catch(PDOException $e) {
-        error_log("Error getting dashboard stats: " . $e->getMessage());
-        error_log("Database error: " . $e->getMessage());
+        error_log("Error in getDashboardStats: " . $e->getMessage());
         return array(
             'students' => 0,
             'teachers' => 0,
@@ -59,7 +68,7 @@ function getDashboardStats() {
 $stats = getDashboardStats();
 
 // Debug output
-error_log("Dashboard stats: " . print_r($stats, true));
+error_log("Dashboard stats retrieved: " . print_r($stats, true));
 ?>
 <!DOCTYPE html>
 <html lang="en">

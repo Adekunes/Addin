@@ -14,6 +14,10 @@ $adminDb = new AdminDatabase();
 $students = $adminDb->getAllStudents();
 
 // Debug output
+error_log("Number of students fetched: " . ($students ? count($students) : 0));
+error_log("Student data: " . print_r($students, true));
+
+// Add visible debug output in HTML comments
 echo "<!-- Debug Information -->";
 echo "<!-- Number of students found: " . count($students) . " -->";
 echo "<!-- Student data: " . print_r($students, true) . " -->";
@@ -250,6 +254,155 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
             color: #666;
             font-style: italic;
         }
+
+        .quality-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .quality-badge.excellent {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .quality-badge.good {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .quality-badge.average {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .quality-badge.needswork {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .quality-badge.not-rated {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            border-color: #2ecc71;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+        }
+
+        .form-group select option {
+            padding: 8px;
+        }
+
+        .form-group select:hover {
+            border-color: #2ecc71;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            position: relative;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: #000;
+            font-size: 12px;
+            line-height: 20px;
+            z-index: 1;
+            text-shadow: 
+                -1px -1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px 1px 0 #fff;
+        }
+
+        /* Progress bar color variations based on progress */
+        .progress-bar[style*="width: 100%"] {
+            background-color: #4CAF50; /* Full - Green */
+        }
+
+        .progress-bar[style*="width: 6"] { /* 60-99% */
+            background-color: #2196F3; /* Blue */
+        }
+
+        .progress-bar[style*="width: 3"] { /* 30-59% */
+            background-color: #FF9800; /* Orange */
+        }
+
+        .progress-bar[style*="width: 1"],
+        .progress-bar[style*="width: 2"] { /* 0-29% */
+            background-color: #f44336; /* Red */
+        }
+
+        /* Style for ayat select dropdowns */
+.form-group select[id^="startAyat"],
+.form-group select[id^="endAyat"] {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Fix modal positioning for dropdowns */
+.modal-content {
+    overflow: visible !important;
+}
+
+.form-group select {
+    position: relative;
+    z-index: 1050; /* Higher than modal's z-index */
+}
+
+/* Make select options visible when dropdown is open */
+.form-group select option {
+    padding: 8px 12px;
+    background-color: white;
+}
+
+/* Add scrollbar styling */
+.form-group select::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-group select::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.form-group select::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.form-group select::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
     </style>
 </head>
 <body>
@@ -285,96 +438,74 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
             </button>
         </div>
 
-        <div class="table-container">
-            <table>
+        <div class="table-responsive">
+            <table id="studentsTable" class="display">
                 <thead>
                     <tr>
-                        <th>Student Name</th>
-                        <th>Guardian</th>
-                        <th>Current Juz</th>
-                        <th>Lines Memorized</th>
-                        <th>Juz Progress</th>
-                        <th>Last Revision</th>
-                        <th>Quality</th>
-                        <th>Tajweed</th>
+                        <th>Name</th>
+                        <th>Current Surah</th>
+                        <th>Progress</th>
+                        <th>Quality Rating</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($students)): ?>
-                        <tr>
-                            <td colspan="11" class="no-data">No students available</td>
-                        </tr>
-                    <?php else: ?>
-                        <tr class="no-results" style="display: none;">
-                            <td colspan="11">No matching students found</td>
-                        </tr>
-                        <?php foreach($students as $student): ?>
+                    <?php if ($students && count($students) > 0): ?>
+                        <?php foreach ($students as $student): ?>
                             <tr>
-                                <td class="name-cell">
-                                    <div class="user-icon">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name"><?php echo htmlspecialchars($student['name']); ?></div>
-                                    </div>
-                                </td>
+                                <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                <td><?php echo htmlspecialchars($student['current_surah'] ?? 'Not started'); ?></td>
                                 <td>
-                                    <div class="user-details">
-                                        <div class="user-name"><?php echo htmlspecialchars($student['guardian_name']); ?></div>
-                                        <div class="user-contact"><?php echo htmlspecialchars($student['guardian_contact']); ?></div>
-                                    </div>
-                                </td>
-                                <td class="juz-info">
-                                    <div class="current-juz">Juz <?php echo htmlspecialchars($student['current_juz']); ?></div>
-                                    <div class="mastery-level"><?php echo ucfirst($student['mastery_level'] ?? 'Not Started'); ?></div>
-                                </td>
-                                <td>
-                                    <div class="lines-info">
-                                        <span class="lines-count"><?php echo htmlspecialchars($student['lines_memorized'] ?? '0'); ?></span>
-                                        <span class="lines-label">lines</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="completion-progress">
-                                        <div class="progress-bar">
-                                            <div class="progress" style="width: <?php echo (($student['completed_juz'] ?? 0) / 30) * 100; ?>%"></div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" 
+                                             style="width: <?php echo ($student['current_juz'] / 30) * 100; ?>%"
+                                             title="<?php echo $student['current_juz']; ?> of 30 Juz">
                                         </div>
-                                        <span class="completion-text"><?php echo htmlspecialchars($student['completed_juz'] ?? '0'); ?>/30</span>
+                                        <span class="progress-text">
+                                            <?php echo $student['current_juz']; ?>/30 Juz
+                                        </span>
                                     </div>
                                 </td>
-                                <td class="revision-info">
-                                    <?php if(isset($student['last_revision_date'])): ?>
-                                        <div class="revision-date"><?php echo date('Y-m-d', strtotime($student['last_revision_date'])); ?></div>
-                                        <div class="revision-count">
-                                            Revisions: <?php echo $student['revision_count'] ?? 0; ?>
-                                        </div>
+                                <td>
+                                    <?php if (isset($student['quality_rating'])): ?>
+                                        <span class="quality-badge <?php echo strtolower($student['quality_rating']); ?>">
+                                            <?php echo htmlspecialchars($student['quality_rating']); ?>
+                                        </span>
                                     <?php else: ?>
-                                        <span class="no-revision">No revisions</span>
+                                        <span class="quality-badge not-rated">Not rated</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="quality-badge <?php echo strtolower($student['memorization_quality'] ?? 'none'); ?>">
-                                        <?php echo ucfirst($student['memorization_quality'] ?? 'Not Rated'); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo ucfirst($student['tajweed_level'] ?? 'Not Set'); ?></td>
-                                <td>
                                     <span class="status-badge <?php echo strtolower($student['status']); ?>">
-                                        <?php echo ucfirst($student['status']); ?>
+                                        <?php echo htmlspecialchars($student['status']); ?>
                                     </span>
                                 </td>
                                 <td class="actions">
-                                    <button type="button" class="btn-icon edit" data-student-id="<?php echo $student['id']; ?>">
-                                        <i class="fas fa-pen"></i>
+                                    <button 
+                                        type="button"
+                                        class="btn-icon edit"
+                                        data-student-id="<?php echo (int)$student['id']; ?>"
+                                        title="Edit Student"
+                                    >
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="btn-icon delete" data-student-id="<?php echo $student['id']; ?>">
-                                        <i class="fas fa-trash"></i>
+                                    <button 
+                                        type="button"
+                                        class="btn-icon status"
+                                        data-student-id="<?php echo (int)$student['id']; ?>"
+                                        onclick="toggleStudentStatus(<?php echo (int)$student['id']; ?>, '<?php echo htmlspecialchars($student['status']); ?>')"
+                                        title="<?php echo $student['status'] === 'active' ? 'Deactivate' : 'Activate'; ?> Student"
+                                    >
+                                        <i class="fas fa-power-off"></i>
                                     </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6" class="text-center">No students found</td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -401,72 +532,65 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                         <h3>Juz Progress</h3>
                         <div class="form-group">
                             <label for="currentJuz">Current Juz</label>
-                            <input type="number" id="currentJuz" name="currentJuz" min="1" max="30" required>
+                            <select id="currentJuz" name="currentJuz" required>
+                                <option value="">Select Current Juz</option>
+                                <?php for($i = 1; $i <= 30; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo (isset($student['current_juz']) && $student['current_juz'] == $i) ? 'selected' : ''; ?>>
+                                        Juz <?php echo $i; ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
                         </div>
                         
                         <div class="form-group">
-                            <label for="masteryLevel">Mastery Level</label>
-                            <select id="masteryLevel" name="masteryLevel" required>
-                                <option value="not_started">Not Started</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="memorized">Memorized</option>
-                                <option value="mastered">Mastered</option>
+                            <label for="memorizationQuality">Quality Rating</label>
+                            <select name="memorizationQuality" id="memorizationQuality" class="form-control" required>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="average" selected>Average</option>
+                                <option value="needsWork">Needs Work</option>
+                                <option value="horrible">Horrible</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="memorizationQuality">Overall Memorization Quality</label>
-                        <select id="memorizationQuality" name="memorizationQuality" required>
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="average">Average</option>
-                            <option value="needsWork">Needs Work</option>
-                        </select>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="surahName">Surah Name</label>
-                        <input type="text" id="surahName" name="surahName" required>
-                    </div>
+                        <div class="form-group">
+                            <label for="teacherNotes">Notes</label>
+                            <textarea id="teacherNotes" name="teacherNotes" rows="3"></textarea>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="verseStart">Starting Verse</label>
-                        <input type="number" id="verseStart" name="verseStart" required min="1">
-                    </div>
+                        <div class="form-group">
+                            <label for="currentSurah">Current Surah</label>
+                            <select id="currentSurah" name="currentSurah" class="form-control" required>
+                                <option value="">Select Surah</option>
+                                <?php
+                                // Surahs will be populated dynamically based on selected juz
+                                ?>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="verseEnd">Ending Verse</label>
-                        <input type="number" id="verseEnd" name="verseEnd" required min="1">
-                    </div>
+                        <div class="form-group">
+                            <label for="startAyat">Starting Ayat</label>
+                            <select id="startAyat" name="startAyat" class="form-control" required>
+                                <option value="">Select Starting Ayat</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="linesMemorized">Lines Memorized</label>
-                        <input type="number" id="linesMemorized" name="linesMemorized" required min="0">
-                    </div>
+                        <div class="form-group">
+                            <label for="endAyat">Last Memorized Ayat</label>
+                            <select id="endAyat" name="endAyat" class="form-control" required>
+                                <option value="">Select Ending Ayat</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="tajweedLevel">Tajweed Level</label>
-                        <select id="tajweedLevel" name="tajweedLevel" required>
-                            <option value="beginner">Beginner</option>
-                            <option value="intermediate">Intermediate</option>
-                            <option value="advanced">Advanced</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="teacherNotes">Teacher Notes</label>
-                        <textarea id="teacherNotes" name="teacherNotes" rows="4"></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Update Progress</button>
-                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        </div>
                     </div>
                 </form>
 
                 <form id="revisionForm" class="tab-content" data-tab="revision">
-                    <input type="hidden" id="studentId" name="student_id">
+                    <input type="hidden" name="student_id" value="">
                     <input type="hidden" name="action" value="add_revision">
                     
                     <div class="form-section">

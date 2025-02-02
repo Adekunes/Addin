@@ -61,30 +61,49 @@ class AdminDatabase {
 
     public function getStudentById($id) {
         try {
-            $query = "SELECT s.*, p.current_juz, p.completed_juz, 
-                            p.memorization_quality, p.tajweed_level, 
-                            p.teacher_notes, jm.mastery_level
-                     FROM students s
-                     LEFT JOIN progress p ON s.id = p.student_id
-                     LEFT JOIN juz_mastery jm ON s.id = jm.student_id 
-                         AND jm.juz_number = p.current_juz
-                     WHERE s.id = :id";
-            
+            $query = "SELECT 
+                s.*,
+                p.current_juz,
+                p.completed_juz,
+                p.current_surah,
+                p.verses_memorized,
+                p.quality_rating as memorization_quality,
+                p.tajweed_level,
+                p.teacher_notes
+            FROM students s
+            LEFT JOIN (
+                SELECT 
+                    student_id,
+                    current_juz,
+                    completed_juz,
+                    current_surah,
+                    verses_memorized,
+                    quality_rating,
+                    tajweed_level,
+                    teacher_notes
+                FROM progress 
+                WHERE student_id = :id 
+                ORDER BY date DESC 
+                LIMIT 1
+            ) p ON s.id = p.student_id
+            WHERE s.id = :id";
+
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $student = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if (!$result) {
-                error_log("No student found with ID: $id");
+            if ($student) {
+                error_log("Found student data: " . print_r($student, true));
+                return $student;
+            } else {
+                error_log("No student found with ID: " . $id);
                 return null;
             }
-            
-            return $result;
         } catch(PDOException $e) {
-            error_log("Error fetching student: " . $e->getMessage());
-            return false;
+            error_log("Error in getStudentById: " . $e->getMessage());
+            return null;
         }
     }
 
@@ -136,31 +155,43 @@ class AdminDatabase {
 
     public function getAllStudents() {
         try {
-            $query = "SELECT s.*, p.current_juz, p.completed_juz, p.memorization_quality, 
-                         p.tajweed_level, p.teacher_notes, jm.mastery_level,
-                         (
-                             SELECT MAX(revision_date) 
-                             FROM juz_revisions 
-                             WHERE student_id = s.id
-                         ) as last_revision_date,
-                         (
-                             SELECT COUNT(*) 
-                             FROM juz_revisions 
-                             WHERE student_id = s.id
-                         ) as revision_count
-                   FROM students s
-                   LEFT JOIN progress p ON s.id = p.student_id
-                   LEFT JOIN juz_mastery jm ON s.id = jm.student_id 
-                       AND jm.juz_number = COALESCE(p.current_juz, 1)
-                   GROUP BY s.id
-                   ORDER BY s.name ASC";
-            
+            $query = "SELECT 
+                        s.*,
+                        p.current_juz,
+                        p.memorization_quality,
+                        p.teacher_notes,
+                        p.date as last_update
+                     FROM students s
+                     LEFT JOIN (
+                        SELECT 
+                            student_id,
+                            current_juz,
+                            memorization_quality,
+                            teacher_notes,
+                            date,
+                            ROW_NUMBER() OVER (PARTITION BY student_id ORDER BY date DESC, id DESC) as rn
+                        FROM progress
+                     ) p ON s.id = p.student_id AND p.rn = 1
+                     WHERE s.status = 'active'
+                     ORDER BY s.name";
+
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Set default current_juz for students without progress
+            foreach ($students as &$student) {
+                if (!isset($student['current_juz'])) {
+                    $student['current_juz'] = 1;
+                }
+            }
+            
+            return $students;
+            
         } catch(PDOException $e) {
-            error_log("Error fetching students: " . $e->getMessage());
-            return [];
+            error_log("Database error in getAllStudents: " . $e->getMessage());
+            throw new Exception("Database error while fetching students");
         }
     }
 
@@ -261,30 +292,47 @@ class AdminDatabase {
 
     public function updateProgress($data) {
         try {
-            $query = "UPDATE progress SET 
-                      current_juz = :current_juz,
-                      completed_juz = :completed_juz,
-                      memorization_quality = :memorization_quality,
-                      tajweed_level = :tajweed_level,
-                      teacher_notes = :teacher_notes,
-                      updated_at = :updated_at,
-                      date = :date
-                      WHERE student_id = :student_id";
+            $query = "INSERT INTO progress 
+                        (student_id, 
+                        current_juz,
+                        current_surah,
+                        start_ayat,
+                        end_ayat, 
+                        memorization_quality, 
+                        teacher_notes, 
+                        date) 
+                     VALUES 
+                        (:student_id, 
+                        :current_juz,
+                        :current_surah,
+                        :start_ayat,
+                        :end_ayat,
+                        :memorization_quality, 
+                        :teacher_notes, 
+                        CURRENT_DATE)";
             
             $stmt = $this->db->prepare($query);
-            return $stmt->execute([
+            $params = [
                 ':student_id' => $data['student_id'],
                 ':current_juz' => $data['current_juz'],
-                ':completed_juz' => $data['completed_juz'],
-                ':memorization_quality' => $data['memorization_quality'],
-                ':tajweed_level' => $data['tajweed_level'],
-                ':teacher_notes' => $data['teacher_notes'],
-                ':updated_at' => $data['updated_at'],
-                ':date' => $data['date']
-            ]);
+                ':current_surah' => $data['current_surah'],
+                ':start_ayat' => $data['start_ayat'],
+                ':end_ayat' => $data['end_ayat'],
+                ':memorization_quality' => $data['memorization_quality'] ?? 'average',
+                ':teacher_notes' => $data['teacher_notes'] ?? null
+            ];
+            
+            $result = $stmt->execute($params);
+            
+            if (!$result) {
+                throw new Exception("Failed to insert progress record");
+            }
+            
+            return true;
+            
         } catch(PDOException $e) {
-            error_log("Error updating progress: " . $e->getMessage());
-            return false;
+            error_log("Database error in updateProgress: " . $e->getMessage());
+            throw new Exception("Database error while inserting progress");
         }
     }
 
@@ -309,156 +357,145 @@ class AdminDatabase {
         }
     }
 
+    public function getStudentRevisionHistory($studentId) {
+        try {
+            error_log("Starting getStudentRevisionHistory for student ID: " . $studentId);
+            
+            // First check if the juz_revisions table exists
+            $checkTable = $this->db->query("SHOW TABLES LIKE 'juz_revisions'");
+            if ($checkTable->rowCount() == 0) {
+                // Create the table if it doesn't exist
+                $this->db->exec("CREATE TABLE IF NOT EXISTS juz_revisions (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    student_id INT NOT NULL,
+                    juz_revised INT NOT NULL,
+                    revision_date DATE NOT NULL,
+                    memorization_quality ENUM('excellent', 'good', 'average', 'needsWork') DEFAULT 'average',
+                    teacher_notes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+
+                )");
+                error_log("Created juz_revisions table");
+                return []; // Return empty array for new table
+            }
+
+            // Validate student ID
+            if (!is_numeric($studentId)) {
+                error_log("Invalid student ID format: " . $studentId);
+                throw new Exception("Invalid student ID format");
+            }
+
+            $query = "SELECT 
+                        revision_date,
+                        juz_revised,
+                        memorization_quality,
+                        teacher_notes
+                     FROM juz_revisions
+                     WHERE student_id = :student_id
+                     ORDER BY revision_date DESC, id DESC";
+                     
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':student_id' => $studentId]);
+            
+            $revisions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("Successfully retrieved " . count($revisions) . " revisions for student ID: " . $studentId);
+            error_log("Revision data: " . print_r($revisions, true));
+            
+            return $revisions;
+            
+        } catch(PDOException $e) {
+            error_log("Database error in getStudentRevisionHistory: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw new Exception("Database error while fetching revision history: " . $e->getMessage());
+        } catch(Exception $e) {
+            error_log("General error in getStudentRevisionHistory: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
+        }
+    }
+
     public function addJuzRevision($data) {
         try {
             error_log("Starting addJuzRevision with data: " . print_r($data, true));
             
-            // First verify the student exists
-            $checkStudent = $this->db->prepare("SELECT s.id, p.current_juz 
-                                               FROM students s 
-                                               LEFT JOIN progress p ON s.id = p.student_id 
-                                               WHERE s.id = ?");
-            $checkStudent->execute([$data['student_id']]);
-            $student = $checkStudent->fetch(PDO::FETCH_ASSOC);
-            if (!$student) {
-                error_log("Student not found with ID: " . $data['student_id']);
-                throw new Exception('Student not found');
+            // Validate required fields
+            if (!isset($data['student_id']) || !isset($data['juz_revised'])) {
+                throw new Exception("Missing required revision data");
             }
 
-            // Update the progress table with the latest revision
-            $updateProgress = $this->db->prepare("
-                UPDATE progress 
-                SET last_revision_date = :revision_date
-                WHERE student_id = :student_id
-            ");
-            $updateProgress->execute([
-                ':student_id' => $data['student_id'],
-                ':revision_date' => $data['revision_date']
-            ]);
-
-            // Add the revision record
             $query = "INSERT INTO juz_revisions 
-                      (student_id, juz_revised, revision_date, quality_rating, teacher_notes) 
-                      VALUES (:student_id, :juz_revised, :revision_date, :quality_rating, :teacher_notes)";
-            
-            error_log("SQL Query: " . $query);
+                     (student_id, juz_revised, revision_date, memorization_quality, teacher_notes)
+                     VALUES 
+                     (:student_id, :juz_revised, :revision_date, :memorization_quality, :teacher_notes)";
+                     
             $stmt = $this->db->prepare($query);
-            
-            $params = [
+            $result = $stmt->execute([
                 ':student_id' => $data['student_id'],
                 ':juz_revised' => $data['juz_revised'],
                 ':revision_date' => $data['revision_date'],
-                ':quality_rating' => $data['quality_rating'],
+                ':memorization_quality' => $data['memorization_quality'],
                 ':teacher_notes' => $data['teacher_notes']
-            ];
+            ]);
             
-            error_log("Parameters: " . print_r($params, true));
+            error_log("Revision addition result: " . ($result ? "success" : "failed"));
             
-            try {
-                $result = $stmt->execute($params);
-                if (!$result) {
-                    $errorInfo = $stmt->errorInfo();
-                    error_log("Database error: " . print_r($errorInfo, true));
-                    throw new PDOException("Database error: " . $errorInfo[2]);
-                }
-
-                // Update juz_mastery table
-                $updateMastery = $this->db->prepare("
-                    INSERT INTO juz_mastery 
-                    (student_id, juz_number, last_revision_date, revision_count)
-                    VALUES (:student_id, :juz_number, :revision_date, 1)
-                    ON DUPLICATE KEY UPDATE 
-                    last_revision_date = :revision_date,
-                    revision_count = revision_count + 1
-                ");
-                
-                $updateMastery->execute([
-                    ':student_id' => $data['student_id'],
-                    ':juz_number' => $data['juz_revised'],
-                    ':revision_date' => $data['revision_date']
-                ]);
-
-                return true;
-            } catch (PDOException $e) {
-                error_log("Execute error: " . $e->getMessage());
-                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                    throw new Exception('A revision for this juz has already been recorded today');
-                }
-                throw $e;
-            }
+            return $result;
+            
         } catch(PDOException $e) {
-            error_log("PDO Exception in addJuzRevision: " . $e->getMessage());
+            error_log("Database error in addJuzRevision: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
-            throw new Exception('Database error: ' . $e->getMessage());
+            throw new Exception("Database error while adding revision: " . $e->getMessage());
         }
     }
 
     public function getStudentHistory($studentId) {
         try {
-            // Get revision history
-            $revisionQuery = "
-                SELECT 
-                    revision_date,
-                    juz_revised,
-                    quality_rating,
-                    teacher_notes
-                FROM juz_revisions
-                WHERE student_id = :student_id
-                ORDER BY revision_date DESC, created_at DESC
-            ";
-            
-            $revisionStmt = $this->db->prepare($revisionQuery);
-            $revisionStmt->execute([':student_id' => $studentId]);
-            $revisions = $revisionStmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Fetching history for student ID: " . $studentId);
 
-            // Get memorization progress for all juz
-            $progressQuery = "
-                SELECT 
-                    jm.juz_number,
-                    jm.mastery_level,
-                    jm.last_revision_date,
-                    jm.revision_count,
-                    COALESCE(
-                        (SELECT COUNT(*) 
-                         FROM juz_revisions jr 
-                         WHERE jr.student_id = jm.student_id 
-                         AND jr.juz_revised = jm.juz_number),
-                        0
-                    ) as total_revisions
-                FROM juz_mastery jm
-                WHERE jm.student_id = :student_id
-                UNION
-                SELECT 
-                    number as juz_number,
-                    'not_started' as mastery_level,
-                    NULL as last_revision_date,
-                    0 as revision_count,
-                    0 as total_revisions
-                FROM (
-                    SELECT 1 as number UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5
-                    UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
-                    UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15
-                    UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20
-                    UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25
-                    UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30
-                ) numbers
-                WHERE number NOT IN (
-                    SELECT juz_number FROM juz_mastery WHERE student_id = :student_id
-                )
-                ORDER BY juz_number ASC
-            ";
-            
-            $progressStmt = $this->db->prepare($progressQuery);
-            $progressStmt->execute([':student_id' => $studentId]);
-            $progress = $progressStmt->fetchAll(PDO::FETCH_ASSOC);
+            $query = "SELECT 
+                        'progress' as source,
+                        date as revision_date,
+                        current_juz as juz_revised,
+                        memorization_quality as quality_rating,
+                        teacher_notes
+                     FROM progress 
+                     WHERE student_id = :student_id
+                     
+                     UNION ALL
+                     
+                     SELECT 
+                        'revision' as source,
+                        revision_date,
+                        juz_revised,
+                        memorization_quality,
+                        teacher_notes
+                     FROM juz_revisions
+                     WHERE student_id = :student_id
+                     
+                     ORDER BY revision_date DESC, source DESC
+                     LIMIT 50";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':student_id' => $studentId]);
+            $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            error_log("Found " . count($history) . " history records");
+            error_log("History data: " . print_r($history, true));
 
             return [
-                'revisions' => $revisions,
-                'progress' => $progress
+                'success' => true,
+                'revisions' => $history
             ];
+
         } catch(PDOException $e) {
-            error_log("Error fetching student history: " . $e->getMessage());
-            throw new Exception('Failed to fetch student history');
+            error_log("Database error in getStudentHistory: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return [
+                'success' => false,
+                'message' => "Failed to fetch history: " . $e->getMessage()
+            ];
         }
     }
 
@@ -707,6 +744,176 @@ class AdminDatabase {
                   WHERE status = 'active'";
         $stmt = $this->db->query($query);
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    public function getStudent($studentId) {
+        try {
+            // Debug log
+            error_log("Fetching student with ID: " . $studentId);
+            
+            $query = "SELECT s.*, p.current_juz, p.completed_juz, p.memorization_quality, p.teacher_notes 
+                     FROM students s 
+                     LEFT JOIN progress p ON s.id = p.student_id 
+                     WHERE s.id = :student_id";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':student_id' => $studentId]);
+            
+            $student = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Debug log
+            error_log("Query result: " . print_r($student, true));
+            
+            if (!$student) {
+                error_log("No student found with ID: " . $studentId);
+                throw new Exception('Student not found');
+            }
+            
+            return $student;
+        } catch(PDOException $e) {
+            error_log("Database error in getStudent: " . $e->getMessage());
+            throw new Exception('Database error while fetching student');
+        }
+    }
+
+    public function getLatestProgress($studentId) {
+        try {
+            $query = "SELECT 
+                        current_juz,
+                        memorization_quality,
+                        teacher_notes,
+                        date
+                     FROM progress 
+                     WHERE student_id = :student_id 
+                     ORDER BY date DESC, id DESC 
+                     LIMIT 1";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':student_id' => $studentId]);
+            $progress = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                'success' => true,
+                'progress' => $progress ?: [
+                    'current_juz' => '1',
+                    'memorization_quality' => 'average',
+                    'teacher_notes' => '',
+                    'date' => date('Y-m-d')
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            error_log("Database error in getLatestProgress: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Failed to fetch latest progress"
+            ];
+        }
+    }
+
+    public function getAllSurahs() {
+        try {
+            $query = "SELECT id, surah_number, name, total_ayat FROM surah ORDER BY surah_number";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            error_log("Database error in getAllSurahs: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getSurahsByJuz($juzNumber) {
+        try {
+            error_log("Fetching surahs for juz: " . $juzNumber);
+            
+            // First get the surah list for this juz
+            $query = "SELECT surah_list FROM juz WHERE juz_number = :juz_number";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':juz_number' => $juzNumber]);
+            $juzData = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$juzData) {
+                return [
+                    'success' => false,
+                    'message' => "Juz not found"
+                ];
+            }
+            
+            // Convert surah list string to array
+            $surahIds = explode(',', $juzData['surah_list']);
+            $surahIds = array_map('trim', $surahIds);
+            
+            // Get surah details
+            $placeholders = str_repeat('?,', count($surahIds) - 1) . '?';
+            $query = "SELECT 
+                        id as surah_id,
+                        name,
+                        total_ayat as end_ayat
+                     FROM surah 
+                     WHERE surah_number IN ($placeholders)
+                     ORDER BY surah_number";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($surahIds);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Add start_ayat (1 for all surahs in this simple version)
+            foreach ($results as &$surah) {
+                $surah['start_ayat'] = 1;
+            }
+            
+            return [
+                'success' => true,
+                'surahs' => $results
+            ];
+            
+        } catch(PDOException $e) {
+            error_log("Database error in getSurahsByJuz: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Database error: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function updateStudentProgress($studentId, $currentJuz, $currentSurah, $startAyat, $endAyat, $quality, $notes) {
+        try {
+            // Calculate verses memorized
+            $verses_memorized = $endAyat - $startAyat; // Add 1 because it's inclusive
+            error_log("Calculated verses memorized: $verses_memorized (from ayat $startAyat to $endAyat)");
+
+            $query = "INSERT INTO progress 
+                        (student_id, current_juz, current_surah, start_ayat, end_ayat, 
+                         verses_memorized, memorization_quality, teacher_notes, date) 
+                     VALUES 
+                        (:student_id, :current_juz, :current_surah, :start_ayat, :end_ayat,
+                         :verses_memorized, :quality, :notes, CURRENT_DATE)";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
+                ':student_id' => $studentId,
+                ':current_juz' => $currentJuz,
+                ':current_surah' => $currentSurah,
+                ':start_ayat' => $startAyat,
+                ':end_ayat' => $endAyat,
+                ':verses_memorized' => $verses_memorized,
+                ':quality' => $quality,
+                ':notes' => $notes
+            ]);
+            
+            return [
+                'success' => true,
+                'message' => 'Progress updated successfully',
+                'verses_memorized' => $verses_memorized
+            ];
+        } catch(PDOException $e) {
+            error_log("Database error in updateStudentProgress: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Failed to update progress: " . $e->getMessage()
+            ];
+        }
     }
 }
 
