@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (juzNumber) {
                 try {
                     console.log('Fetching surahs for juz:', juzNumber);
-                    const response = await fetch(`../../../model/auth/process_student.php?action=get_surahs_by_juz&juz=${juzNumber}`);
+                    const response = await fetch(`../../model/auth/process_student.php?action=get_surahs_by_juz&juz=${juzNumber}`);
                     const data = await response.json();
                     console.log('Received surahs:', data);
                     
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (confirm('Are you sure you want to delete this student?')) {
                 try {
-                    const response = await fetch('../../../model/auth/process_student.php', {
+                    const response = await fetch('../../model/auth/process_student.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const formData = new FormData(this);
             
-            fetch('../../../model/auth/process_student.php', {
+            fetch('../../model/auth/process_student.php', {
                 method: 'POST',
                 body: formData
             })
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 console.log('Form data being submitted:', formDataObj);
                 
-                const response = await fetch('../../../model/auth/process_student.php', {
+                const response = await fetch('../../model/auth/process_student.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -256,54 +256,77 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Search functionality
-    const searchInput = document.getElementById('studentSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const tableRows = document.querySelectorAll('table tbody tr:not(.no-results)');
-            const noResultsRow = document.querySelector('.no-results');
+    // Get search elements
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const studentsTable = document.getElementById('studentsTable');
+    
+    if (searchInput && studentsTable) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const tableBody = studentsTable.querySelector('tbody');
+            const rows = tableBody.querySelectorAll('tr');
             
-            tableRows.forEach(row => {
-                const name = row.querySelector('.user-name')?.textContent.toLowerCase() || '';
-                const guardian = row.querySelector('.user-details')?.textContent.toLowerCase() || '';
-                const juz = row.querySelector('.current-juz')?.textContent.toLowerCase() || '';
-                const quality = row.querySelector('.quality-badge')?.textContent.toLowerCase() || '';
-                const tajweed = row.querySelector('td:nth-child(8)')?.textContent.toLowerCase() || '';
+            // Show/hide clear button
+            if (clearSearchBtn) {
+                clearSearchBtn.style.display = searchTerm ? 'block' : 'none';
+            }
+
+            rows.forEach(row => {
+                // Get text content from name and other relevant columns
+                const studentName = row.querySelector('td:nth-child(1)');
+                const guardianName = row.querySelector('td:nth-child(2)');
+                const currentJuz = row.querySelector('td:nth-child(3)');
                 
-                const matchesSearch = 
-                    name.includes(searchTerm) || 
-                    guardian.includes(searchTerm) || 
-                    juz.includes(searchTerm) || 
-                    quality.includes(searchTerm) ||
-                    tajweed.includes(searchTerm);
-                
-                row.style.display = matchesSearch ? '' : 'none';
+                if (studentName && guardianName && currentJuz) {
+                    const searchableText = [
+                        studentName.textContent,
+                        guardianName.textContent,
+                        currentJuz.textContent
+                    ].join(' ').toLowerCase();
+
+                    // Show/hide based on search term
+                    if (searchTerm === '' || searchableText.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
             });
 
-            // Show "No matching students" message only when searching with no results
-            if (noResultsRow) {
-                const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
-                noResultsRow.style.display = searchTerm && visibleRows.length === 0 ? '' : 'none';
+            // Handle no results message
+            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+            let noResultsRow = tableBody.querySelector('.no-results');
+            
+            if (visibleRows.length === 0) {
+                if (!noResultsRow) {
+                    noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results';
+                    noResultsRow.innerHTML = `
+                        <td colspan="6" style="text-align: center; padding: 1rem;">
+                            No students found matching "${searchTerm}"
+                        </td>`;
+                    tableBody.appendChild(noResultsRow);
+                }
+            } else if (noResultsRow) {
+                noResultsRow.remove();
             }
         });
 
-        // Add clear search button
-        const searchContainer = searchInput.parentElement;
-        const clearButton = document.createElement('button');
-        clearButton.className = 'clear-search';
-        clearButton.innerHTML = '&times;';
-        clearButton.style.display = 'none';
-        searchContainer.appendChild(clearButton);
-
-        clearButton.addEventListener('click', () => {
-            searchInput.value = '';
-            searchInput.dispatchEvent(new Event('input'));
-            clearButton.style.display = 'none';
-        });
-
-        searchInput.addEventListener('input', () => {
-            clearButton.style.display = searchInput.value ? 'block' : 'none';
+        // Clear search functionality
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                // Trigger the input event to update the table
+                searchInput.dispatchEvent(new Event('input'));
+                this.style.display = 'none';
+            });
+        }
+    } else {
+        console.error('Search input or students table not found');
+        console.log({
+            searchInput: !!searchInput,
+            studentsTable: !!studentsTable
         });
     }
 
@@ -331,13 +354,15 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             try {
                 const formData = new FormData(this);
-                formData.append('action', 'update_student');
+                const studentId = document.getElementById('studentId').value;
                 
-                // Add start and end ayat to form data
-                const startAyat = document.getElementById('startAyat').value;
-                const endAyat = document.getElementById('endAyat').value;
-                formData.append('start_ayat', startAyat);
-                formData.append('end_ayat', endAyat);
+                if (!studentId) {
+                    throw new Error('Missing required field: student_id');
+                }
+                
+                // Add required fields with correct action
+                formData.set('student_id', studentId);
+                formData.set('action', 'update_progress');
                 
                 // Log form data for debugging
                 const formDataObj = {};
@@ -346,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 console.log('Submitting form data:', formDataObj);
                 
-                const response = await fetch('../../../model/auth/process_student.php', {
+                const response = await fetch('../../model/auth/process_student.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -359,14 +384,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Server response:', result);
                 
                 if (result.success) {
-                    showNotification('Success', 'Student updated successfully', 'success');
+                    showNotification('Success', 'Progress updated successfully', 'success');
                     setTimeout(() => location.reload(), 1500);
                 } else {
-                    throw new Error(result.message || 'Failed to update student');
+                    throw new Error(result.message || 'Failed to update progress');
                 }
             } catch (error) {
                 console.error('Error saving changes:', error);
-                showNotification('Error', error.message || 'Failed to update student', 'error');
+                showNotification('Error', error.message || 'Failed to update progress', 'error');
             }
         });
     }
@@ -431,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 console.log('Submitting Sabaq Para form data:', formDataObj);
                 
-                const response = await fetch('../../../model/auth/process_student.php', {
+                const response = await fetch('../../model/auth/process_student.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -477,10 +502,18 @@ async function openEditModal(studentId) {
         }
         modal.style.display = 'block';
 
-        // Fetch student data
-        const response = await fetch(`../../../model/auth/process_student.php?action=get_student&id=${studentId}`);
-        const data = await response.json();
+        // Update fetch paths to use shared location
+        const response = await fetch(`../../model/auth/process_student.php?action=get_student&id=${studentId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Received non-JSON response from server");
+        }
+
+        const data = await response.json();
         console.log('Received student data:', data);
 
         if (!data.success) {
@@ -488,9 +521,12 @@ async function openEditModal(studentId) {
         }
 
         // Get the latest progress data
-        const progressResponse = await fetch(`../../../model/auth/process_student.php?action=get_latest_progress&student_id=${studentId}`);
-        const progressData = await progressResponse.json();
+        const progressResponse = await fetch(`../../model/auth/process_student.php?action=get_latest_progress&student_id=${studentId}`);
+        if (!progressResponse.ok) {
+            throw new Error(`HTTP error! status: ${progressResponse.status}`);
+        }
         
+        const progressData = await progressResponse.json();
         console.log('Received progress data:', progressData);
 
         // Set student ID in all forms
@@ -561,7 +597,7 @@ async function openEditModal(studentId) {
 // Function to delete student
 function deleteStudent(studentId) {
     if (confirm('Are you sure you want to delete this student?')) {
-        fetch('../../../model/auth/process_student.php', {
+        fetch('../../model/auth/process_student.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -585,7 +621,7 @@ function deleteStudent(studentId) {
 
 async function loadHistory(studentId) {
     try {
-        const response = await fetch(`../../../model/auth/process_student.php?action=get_student_history&student_id=${studentId}`);
+        const response = await fetch(`../../model/auth/process_student.php?action=get_student_history&student_id=${studentId}`);
         const data = await response.json();
         
         if (data.success && data.revisions) {
@@ -729,7 +765,7 @@ function viewStudent(studentId) {
     document.querySelector('.tab-button[data-tab="memorization"]').click();
     
     // Fetch student data
-    fetch(`../../../model/auth/process_student.php?action=get_student&id=${studentId}`)
+    fetch(`../../model/auth/process_student.php?action=get_student&id=${studentId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -748,7 +784,7 @@ function viewStudent(studentId) {
 }
 
 function editStudent(studentId) {
-    fetch(`../../../model/auth/process_student.php?action=get_student&id=${studentId}`)
+    fetch(`../../model/auth/process_student.php?action=get_student&id=${studentId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -838,7 +874,7 @@ function populateRevisionHistory(revisions) {
 function toggleStudentStatus(studentId, currentStatus) {
     const newStatus = currentStatus.toLowerCase() === 'active' ? 'inactive' : 'active';
     
-    fetch('../../../model/auth/process_student.php', {
+    fetch('../../model/auth/process_student.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -950,7 +986,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to load Sabaq Para history
 async function loadSabaqParaHistory(studentId) {
     try {
-        const response = await fetch(`../../../model/auth/process_student.php?action=get_sabaq_para_history&student_id=${studentId}`);
+        const response = await fetch(`../../model/auth/process_student.php?action=get_sabaq_para_history&student_id=${studentId}`);
         const data = await response.json();
         
         if (data.success) {
@@ -1046,7 +1082,7 @@ function updateStudent(studentId) {
     // Debug log
     console.log('Updating student with data:', Object.fromEntries(formData));
 
-    fetch('../../../model/auth/process_student.php', {
+    fetch('../../model/auth/process_student.php', {
         method: 'POST',
         body: formData
     })

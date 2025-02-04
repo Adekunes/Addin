@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
     <title>Teacher Dashboard - Hifz Management System</title>
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="../../css/teacher/styles.css">
+    <link rel="stylesheet" href="../../css/admin/styles.css">
     <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>

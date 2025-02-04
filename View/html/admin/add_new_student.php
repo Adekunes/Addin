@@ -3,6 +3,7 @@ session_start();
 require_once '../../../model/auth/admin_auth.php';
 require_once '../../../model/sql/admin_db.php';
 
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../../login.php');
     exit();
@@ -17,8 +18,9 @@ if ($editMode) {
     
     if (!$studentData) {
         // Handle the case where student is not found
-        header('Location: manage_students.php');
+        header('Location: ../manage_students.php');
         exit();
+
     }
 }
 ?>
@@ -103,7 +105,7 @@ if ($editMode) {
     </style>
 </head>
 <body>
-    <?php include '../../../components/php/admin_sidebar.php'; ?>
+    <?php include '../../../components/php/sidebar.php'; ?>
     
     <div class="main-content">
         <h1><?php echo $editMode ? 'Edit Student' : 'Add New Student'; ?></h1>

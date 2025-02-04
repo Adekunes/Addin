@@ -293,6 +293,43 @@ try {
             }
             break;
 
+        case 'update_progress':
+            try {
+                if (!isset($_POST['student_id'])) {
+                    throw new Exception('Student ID is required');
+                }
+
+                $progressData = [
+                    'student_id' => intval($_POST['student_id']),
+                    'current_juz' => intval($_POST['current_juz']),
+                    'current_surah' => $_POST['current_surah'] ?? null,
+                    'start_ayat' => $_POST['start_ayat'] ?? null,
+                    'end_ayat' => $_POST['end_ayat'] ?? null,
+                    'memorization_quality' => $_POST['memorization_quality'],
+                    'teacher_notes' => $_POST['teacher_notes'] ?? null,
+                    'date' => date('Y-m-d')
+                ];
+                
+                error_log("Updating progress with data: " . print_r($progressData, true));
+                
+                $result = $adminDb->updateProgress($progressData);
+                if ($result) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Progress updated successfully'
+                    ]);
+                } else {
+                    throw new Exception('Failed to update progress');
+                }
+            } catch (Exception $e) {
+                error_log("Error updating progress: " . $e->getMessage());
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
+
         default:
             throw new Exception('Invalid action');
     }
