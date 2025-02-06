@@ -138,7 +138,7 @@ error_log("Teachers data: " . print_r($teachers, true));
     </style>
 </head>
 <body>
-    <?php include '../../../components/php/admin_sidebar.php'; ?>
+    <?php include '../../../components/php/sidebar.php'; ?>
     
     <div class="main-content">
         <div class="header">

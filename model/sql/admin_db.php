@@ -977,25 +977,6 @@ class AdminDatabase {
             ];
         }
     }
-
-    public function getTeacherStudents($teacherId) {
-        try {
-            $query = "SELECT s.*, c.name as class_name, p.current_juz, p.completed_juz, 
-                             p.memorization_quality, p.teacher_notes 
-                     FROM students s 
-                     LEFT JOIN classes c ON s.class_id = c.id 
-                     LEFT JOIN progress p ON s.id = p.student_id 
-                     WHERE s.teacher_id = :teacher_id 
-                     AND s.status = 'active'";
-            
-            $stmt = $this->db->prepare($query);
-            $stmt->execute([':teacher_id' => $teacherId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch(PDOException $e) {
-            error_log("Error in getTeacherStudents: " . $e->getMessage());
-            return false;
-        }
-    }
 }
 
 ?> 

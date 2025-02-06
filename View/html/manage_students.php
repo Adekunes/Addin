@@ -47,13 +47,7 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
 
     <div class="main-content">
         <div class="header">
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search by name, guardian, or juz..." class="search-input">
-                <button id="clearSearch" class="clear-search" style="display: none;">&times;</button>
-                <div class="search-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-            </div>
+           
             <div class="user-info">
                 <div class="notifications">
                     <span class="badge">1</span>
@@ -82,16 +76,18 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
         </div>
 
         <div class="table-container">
-            <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search students...">
-                <i class="fas fa-search search-icon"></i>
-                <button type="button" class="clear-search" id="clearSearch">&times;</button>
+        <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search by name, guardian, or juz..." class="search-input">
+                <button id="clearSearch" class="clear-search" style="display: none;">&times;</button>
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
             </div>
             <table id="studentsTable" class="display">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Current Surah</th>
+                        <th>Current Juz</th>
                         <th>Progress</th>
                         <th>Quality Rating</th>
                         <th>Status</th>
@@ -103,30 +99,23 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
                         <?php foreach ($students as $student): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($student['name']); ?></td>
-                                <td><?php echo htmlspecialchars($student['current_surah'] ?? 'Not started'); ?></td>
+                                <td><?php echo 'Juz ' . htmlspecialchars($student['current_juz'] ?? 'Not started'); ?></td>
                                 <td>
                                     <div class="progress-container">
-                                        <div class="progress-bar" 
-                                             style="width: <?php echo ($student['current_juz'] / 30) * 100; ?>%"
-                                             title="<?php echo $student['current_juz']; ?> of 30 Juz">
-                                        </div>
+                                        <?php 
+                                        $completedJuz = isset($student['current_juz']) ? intval($student['current_juz']) : 0;
+                                        $progressPercentage = ($completedJuz / 30) * 100;
+                                        ?>
+                                        <div class="progress-bar" style="width: <?php echo $progressPercentage; ?>%"></div>
                                         <span class="progress-text">
-                                            <?php echo $student['current_juz']; ?>/30 Juz
+                                            <?php echo $completedJuz; ?>/30 Juz
                                         </span>
                                     </div>
                                 </td>
+                                <td><?php echo htmlspecialchars($student['memorization_quality'] ?? 'N/A'); ?></td>
                                 <td>
-                                    <?php if (isset($student['quality_rating'])): ?>
-                                        <span class="quality-badge <?php echo strtolower($student['quality_rating']); ?>">
-                                            <?php echo htmlspecialchars($student['quality_rating']); ?>
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="quality-badge not-rated">Not rated</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <span class="status-badge <?php echo strtolower($student['status']); ?>">
-                                        <?php echo htmlspecialchars($student['status']); ?>
+                                    <span class="status-badge <?php echo strtolower($student['status'] ?? 'inactive'); ?>">
+                                        <?php echo htmlspecialchars($student['status'] ?? 'Inactive'); ?>
                                     </span>
                                 </td>
                                 <td class="actions">

@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (btnSecondary) {
         btnSecondary.addEventListener('click', function() {
-            window.location.href = '/View/html/admin/manage_students.php';
+            window.location.href = '/View/html/manage_students.php';
         });
     }
 });
