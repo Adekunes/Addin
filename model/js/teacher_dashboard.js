@@ -1,3 +1,12 @@
+/**
+ * Teacher Dashboard JavaScript
+ * Handles real-time updates and interactions for the teacher dashboard
+ * Currently a placeholder for future implementation of:
+ * - Real-time student count updates
+ * - Attendance tracking
+ * - Progress monitoring
+ * - Dynamic data loading
+ */
 document.addEventListener('DOMContentLoaded', function() {
     function loadDashboardData() {
         // Fetch dashboard data for the teacher
