@@ -28,27 +28,35 @@ function viewTeacher(teacherId) {
 }
 
 function editTeacher(teacherId) {
+    console.log('Editing teacher with ID:', teacherId); // Debug log
     fetch(`../../../model/auth/process_teacher.php?action=get_teacher&id=${teacherId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Received data:', data); // Debug log
             if (data.success) {
                 const teacher = data.data;
-                document.getElementById('teacherId').value = teacher.id;
-                document.getElementById('teacherName').value = teacher.name;
-                document.getElementById('teacherPhone').value = teacher.phone;
-                document.getElementById('teacherEmail').value = teacher.email;
-                document.getElementById('teacherSubjects').value = teacher.subjects;
-                document.getElementById('teacherStatus').value = teacher.status;
+                document.getElementById('teacherId').value = teacher.teacher_id || teacher.id;
+                document.getElementById('teacherName').value = teacher.name || '';
+                document.getElementById('teacherPhone').value = teacher.phone || '';
+                document.getElementById('teacherEmail').value = teacher.email || '';
+                document.getElementById('teacherSubjects').value = teacher.subjects || '';
+                document.getElementById('teacherStatus').value = teacher.status || 'active';
                 
                 const modal = document.getElementById('editTeacherModal');
                 modal.style.display = 'block';
             } else {
-                alert('Failed to load teacher data');
+                console.error('Server error:', data.message);
+                alert('Failed to load teacher data: ' + (data.message || 'Unknown error'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Failed to load teacher data');
+            alert('Failed to load teacher data: ' + error.message);
         });
 }
 

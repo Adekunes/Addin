@@ -3,6 +3,10 @@ session_start();
 // Update these paths to use the absolute path from the project root
 require_once '../../../model/config/config.php';
 require_once '../../../model/auth/admin_auth.php';
+require_once '../../../model/sql/admin_db.php';
+
+// Add debugging
+error_log("Dashboard loaded - Starting debug");
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -10,56 +14,24 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-function getDashboardStats() {
-    $stats = array();
-    
-    try {
-        $database = new Database();
-        $db = $database->getConnection();
-        
-        // Get total students
-        $query = "SELECT COUNT(*) as count FROM students";
-        $stmt = $db->query($query);
-        $stats['students'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
-        // Get total teachers
-        $query = "SELECT COUNT(*) as count FROM teachers";
-        $stmt = $db->query($query);
-        $stats['teachers'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
-        // Get today's attendance
-        $today = date('Y-m-d');
-        $query = "SELECT COUNT(DISTINCT student_id) as count 
-                  FROM progress 
-                  WHERE DATE(date) = :today";
-        $stmt = $db->prepare($query);
-        $stmt->execute([':today' => $today]);
-        $stats['attendance'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
-        // Get active classes
-        $query = "SELECT COUNT(DISTINCT teacher_id) as count 
-                  FROM teachers";
-        $stmt = $db->query($query);
-        $stats['classes'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
-        return $stats;
-    } catch(PDOException $e) {
-        error_log("Error getting dashboard stats: " . $e->getMessage());
-        error_log("Database error: " . $e->getMessage());
-        return array(
-            'students' => 0,
-            'teachers' => 0,
-            'attendance' => 0,
-            'classes' => 0
-        );
-    }
+$adminDb = new AdminDatabase();
+$result = $adminDb->getDashboardStats();
+
+// Initialize stats with default values
+$stats = [
+    'students' => 0,
+    'teachers' => 0,
+    'attendance' => 0,
+    'classes' => 0
+];
+
+// Only update stats if the query was successful
+if ($result['success'] && isset($result['data'])) {
+    $stats = $result['data'];
+    error_log("Dashboard stats retrieved successfully: " . print_r($stats, true));
+} else {
+    error_log("Error retrieving dashboard stats: " . ($result['message'] ?? 'Unknown error'));
 }
-
-// Get the statistics
-$stats = getDashboardStats();
-
-// Debug output
-error_log("Dashboard stats: " . print_r($stats, true));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,7 +42,7 @@ error_log("Dashboard stats: " . print_r($stats, true));
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="../../css/admin/styles.css">
-    <link rel="stylesheet" href="../../../components/layouts/admin_sidebar.css">
+    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <!-- Dashboard specific CSS -->
@@ -109,7 +81,7 @@ error_log("Dashboard stats: " . print_r($stats, true));
     </style>
 </head>
 <body>
-    <?php include 'C:\xampp\htdocs\Source_folder_final_v2\components\php\admin_sidebar.php'; ?>
+    <?php include '../../../components/php/sidebar.php'; ?>
     
     <div class="main-content">
         <h1>Admin Dashboard</h1>
