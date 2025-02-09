@@ -26,15 +26,9 @@ As of now, the software is limited to the quranic progress of the students. The 
 
 
 ## Help
-
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+For any help, please contact the authors below:
 
 ## Authors
-
-Contributors names and contact info
  
 [@Nazeef](https://www.linkedin.com/in/nazeef-suleman-738988236/)
 [@Abdul Quayum](https://www.linkedin.com/in/abdul-quayum-adekunle-66b9a61a3/)
