@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- ----------------------------------------
+ 
+THIS IS THE LOGIN PAGE FOR THE ADMIN AND TEACHERS
+It makes use of the process_login.php file to process the login
+
+---------------------------------------- -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -119,7 +125,7 @@
             <img src="../../../assets/images/logo.png" alt="Dar Al-'Ulum Montréal Logo" class="logo">
             <h1>Welcome Back</h1>
         </div>
-<!-- /**testing */bjb -->
+
         <?php
         if (isset($_GET['message'])) {
             echo '<div class="success-message">' . htmlspecialchars($_GET['message']) . '</div>';

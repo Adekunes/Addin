@@ -18,7 +18,7 @@ if ($editMode) {
     
     if (!$studentData) {
         // Handle the case where student is not found
-        header('Location: ../../manage_students.php');
+        header('Location: ../manage_students.php');
         exit();
 
     }
@@ -33,7 +33,7 @@ if ($editMode) {
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="../../css/admin/styles.css">
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* Additional styles for form enhancement */
@@ -297,7 +297,7 @@ if ($editMode) {
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../../components/layouts/sidebar.js"></script>
-    <script src="../../../components/js/admin_add_student.js"></script>
+    <script src="../../../components/js/sidebar.js"></script>
+    <script src="../../../model/js/admin_add_student.js"></script>
 </body>
 </html>

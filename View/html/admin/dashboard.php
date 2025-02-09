@@ -42,7 +42,7 @@ if ($result['success'] && isset($result['data'])) {
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="../../css/admin/styles.css">
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <!-- Dashboard specific CSS -->
@@ -112,7 +112,7 @@ if ($result['success'] && isset($result['data'])) {
     </div>
 
     <!-- Scripts -->
-    <script src="../../../components/layouts/sidebar.js"></script>
-    <script src="../../../components/js/admin_dashboard.js"></script>
+    <script src="../../../components/js/sidebar.js"></script>
+    <script src="../../../model/js/admin_dashboard.js"></script>
 </body>
 </html>

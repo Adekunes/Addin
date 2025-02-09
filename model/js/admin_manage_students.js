@@ -1,6 +1,9 @@
 // admin_manage_students.js
+// This file is used to manage the front end of the manage students page
+
 
 // Global functions need to be defined before DOMContentLoaded
+
 window.editStudent = function(studentId) {
     if (!studentId) {
         console.error('No student ID provided to editStudent function');
@@ -60,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (juzNumber) {
                 try {
                     console.log('Fetching surahs for juz:', juzNumber);
-                    const response = await fetch(`../../model/auth/process_student.php?action=get_surahs_by_juz&juz=${juzNumber}`);
+                    const response = await fetch(`../../model/db_requests/process_student.php?action=get_surahs_by_juz&juz=${juzNumber}`);
                     const data = await response.json();
                     console.log('Received surahs:', data);
                     
@@ -156,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (confirm('Are you sure you want to delete this student?')) {
                 try {
-                    const response = await fetch('../../model/auth/process_student.php', {
+                    const response = await fetch('../../model/db_requests/process_student.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -199,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const formData = new FormData(this);
             
-            fetch('../../model/auth/process_student.php', {
+            fetch('../../model/db_requests/process_student.php', {
                 method: 'POST',
                 body: formData
             })
@@ -235,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 console.log('Form data being submitted:', formDataObj);
                 
-                const response = await fetch('../../model/auth/process_student.php', {
+                const response = await fetch('../../model/db_requests/process_student.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -371,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 console.log('Submitting form data:', formDataObj);
                 
-                const response = await fetch('../../model/auth/process_student.php', {
+                const response = await fetch('../../model/db_requests/process_student.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -456,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 console.log('Submitting Sabaq Para form data:', formDataObj);
                 
-                const response = await fetch('../../model/auth/process_student.php', {
+                const response = await fetch('../../model/db_requests/process_student.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -503,7 +506,7 @@ async function openEditModal(studentId) {
         modal.style.display = 'block';
 
         // Update fetch paths to use shared location
-        const response = await fetch(`../../model/auth/process_student.php?action=get_student&id=${studentId}`);
+        const response = await fetch(`../../model/db_requests/process_student.php?action=get_student&id=${studentId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -521,7 +524,7 @@ async function openEditModal(studentId) {
         }
 
         // Get the latest progress data
-        const progressResponse = await fetch(`../../model/auth/process_student.php?action=get_latest_progress&student_id=${studentId}`);
+        const progressResponse = await fetch(`../../model/db_requests/process_student.php?action=get_latest_progress&student_id=${studentId}`);
         if (!progressResponse.ok) {
             throw new Error(`HTTP error! status: ${progressResponse.status}`);
         }
@@ -597,7 +600,7 @@ async function openEditModal(studentId) {
 // Function to delete student
 function deleteStudent(studentId) {
     if (confirm('Are you sure you want to delete this student?')) {
-        fetch('../../model/auth/process_student.php', {
+        fetch('../../model/db_requests/process_student.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -621,7 +624,7 @@ function deleteStudent(studentId) {
 
 async function loadHistory(studentId) {
     try {
-        const response = await fetch(`../../model/auth/process_student.php?action=get_student_history&student_id=${studentId}`);
+        const response = await fetch(`../../model/db_requests/process_student.php?action=get_student_history&student_id=${studentId}`);
         const data = await response.json();
         
         if (data.success && data.revisions) {
@@ -765,7 +768,7 @@ function viewStudent(studentId) {
     document.querySelector('.tab-button[data-tab="memorization"]').click();
     
     // Fetch student data
-    fetch(`../../model/auth/process_student.php?action=get_student&id=${studentId}`)
+    fetch(`../../model/db_requests/process_student.php?action=get_student&id=${studentId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -784,7 +787,7 @@ function viewStudent(studentId) {
 }
 
 function editStudent(studentId) {
-    fetch(`../../model/auth/process_student.php?action=get_student&id=${studentId}`)
+    fetch(`../../model/db_requests/process_student.php?action=get_student&id=${studentId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -874,7 +877,7 @@ function populateRevisionHistory(revisions) {
 function toggleStudentStatus(studentId, currentStatus) {
     const newStatus = currentStatus.toLowerCase() === 'active' ? 'inactive' : 'active';
     
-    fetch('../../model/auth/process_student.php', {
+    fetch('../../model/db_requests/process_student.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -986,7 +989,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to load Sabaq Para history
 async function loadSabaqParaHistory(studentId) {
     try {
-        const response = await fetch(`../../model/auth/process_student.php?action=get_sabaq_para_history&student_id=${studentId}`);
+        const response = await fetch(`../../model/db_requests/process_student.php?action=get_sabaq_para_history&student_id=${studentId}`);
         const data = await response.json();
         
         if (data.success) {
@@ -1082,7 +1085,7 @@ function updateStudent(studentId) {
     // Debug log
     console.log('Updating student with data:', Object.fromEntries(formData));
 
-    fetch('../../model/auth/process_student.php', {
+    fetch('../../model/db_requests/process_student.php', {
         method: 'POST',
         body: formData
     })

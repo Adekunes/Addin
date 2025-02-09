@@ -12,10 +12,11 @@ class EnhancedSidebar {
 
     async loadUserData() {
         try {
-            const response = await fetch('./model/auth/get_user_data.php');
+            const response = await fetch('./model/db_requests/get_user_data.php');
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             
+
             // Update user info in sidebar
             const userNameElement = document.querySelector('.user span');
             const userAvatarElement = document.querySelector('.user .avatar');

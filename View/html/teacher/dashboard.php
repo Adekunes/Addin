@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="../../css/admin/styles.css">
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -53,7 +53,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../../components/layouts/sidebar.js"></script>
-    <script src="../../../components/js/teacher_dashboard.js"></script>
+    <script src="../../../components/css/sidebar.js"></script>
+    <script src="../../../model/js/teacher_dashboard.js"></script>
 </body>
 </html>

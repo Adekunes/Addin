@@ -1,6 +1,25 @@
 <?php
 // Prevent any output before headers
+/* ---------------------------------------- 
+
+THIS IS THE PROCESS STUDENT FILE FOR THE ADMIN
+It makes use of the admin_db.php file to connect to the database
+
+It does the following :
+- add a student
+- update a student
+- delete a student
+- get a student
+- get the revision history of a student
+- get the student history
+- get the latest progress of a student
+- get the surahs by juz
+- add a sabaq para
+- get the sabaq para history
+- update the progress
+---------------------------------------- */
 ob_start();
+
 
 // Disable error display but log them
 error_reporting(E_ALL);

@@ -25,7 +25,7 @@ $schedule = $adminDb->getTeacherSchedule($teacherId);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Schedule - Dar-al-uloom</title>
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="../../css/admin/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
@@ -153,7 +153,7 @@ $schedule = $adminDb->getTeacherSchedule($teacherId);
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="../../../components/layouts/sidebar.js"></script>
-    <script src="../../../components/js/admin_teacher_schedule.js"></script>
+    <script src="../../../components/js/sidebar.js"></script>
+    <script src="../../../model/js/admin_teacher_schedule.js"></script>
 </body>
 </html> 

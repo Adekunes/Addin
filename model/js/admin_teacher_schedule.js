@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         allDaySlot: false,
         slotDuration: '00:30:00',
         events: function(info, successCallback, failureCallback) {
-            fetch(`../../../model/auth/process_schedule.php?action=get_schedule&teacher_id=${teacherId}`)
+            fetch(`../../../model/db_requests/process_schedule.php?action=get_schedule&teacher_id=${teacherId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -86,7 +86,7 @@ document.getElementById('scheduleForm').addEventListener('submit', async functio
     
     try {
         const formData = new FormData(this);
-        const response = await fetch('../../../model/auth/process_schedule.php', {
+        const response = await fetch('../../../model/db_requests/process_schedule.php', {
             method: 'POST',
             body: formData
         });
