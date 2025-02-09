@@ -18,7 +18,7 @@ if ($editMode) {
     
     if (!$studentData) {
         // Handle the case where student is not found
-        header('Location: ../manage_students.php');
+        header('Location: ../../manage_students.php');
         exit();
 
     }

@@ -23,6 +23,7 @@ Source
 ├── components (Reusable components like sidebar, navbar, etc.)
 │   ├── php (PHP includes)
 │   └── js (JavaScript functionality)
+│   └── css
 
 │
 └── model (Backend)
