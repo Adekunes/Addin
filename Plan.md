@@ -1,13 +1,10 @@
 # Dar Al-'Ulum Montréal Hifz Management System
 
 ## Project Overview
-We're building a comprehensive Hifz (Quran memorization) management system for Dar Al-'Ulum Montréal. This system is designed to help manage students' Quran memorization progress, track attendance, and facilitate communication between teachers, administrators, and parents.
+This web app is a comprehensive student progress management system for Dar Al-'Ulum Montréal. This system is designed to help manage students' Quran memorization progress, track attendance, and facilitate communication between teachers, administrators, and parents.
 
-## Brand Identity
-- **Colors**: 
-  - Primary: Green (#006747)
-  - Secondary: Gold/Orange (#FFA500)
-- **Logo**: Dar Al-'Ulum Montréal logo featuring a mosque silhouette in gold with green text
+As of now, the system is in the early stages of development. The hifz progress is being implemented but the academics progress is not yet implemented.
+
 
 ## System Structure
 The project follows a modular structure:
@@ -17,42 +14,63 @@ Source
 │
 ├── View (Frontend)
 │   ├── html
-│   │   ├── admin (Admin interface files)
-│   │   └── teacher (Teacher interface files)
+│   │   ├── admin (Admin exclusive interface files)
+│   │   └── teacher (Teacher exclusive interface files)
 │   └── css (Styling files)
+│       ├── admin (Admin exclusive css files)
+│       └── teacher (Teacher exclusive css files)
 │
-├── components (Reusable components)
+├── components (Reusable components like sidebar, navbar, etc.)
 │   ├── php (PHP includes)
 │   └── js (JavaScript functionality)
+
 │
 └── model (Backend)
     ├── sql (Database queries)
     ├── auth (Authentication)
     └── password (Password management)
+    └── config (Database configuration files)
 ```
 
 ## User Roles
 
 1. **Admin**
-   - Manage teachers and students
-   - Generate reports
-   - System configuration
+   - Teachers and students management
+   - Schedule management
+   - Attendance overview
+   - Hifz progress overview
+   - Academics progress overview
+   - Assignments and materials overview/management
+   - Communication with parents
+   - Communication with teachers
    - User management
 
-2. **Teacher**
+
+2. **Quran Teacher**
+   - Mark attendance
+   - Update student progress
+   - View class schedules
+   - Communicate with parents
+
+   **Academic Teacher** (Future implementation)
    - Mark attendance
    - Update student progress
    - View class schedules
    - Communicate with parents
 
 3. **Parent** (Future implementation)
-   - View child's progress
-   - Check attendance
+   - View child's academic progress
+   - Set attendance
    - Communicate with teachers
+   - Add notes to student records
+   - Add assignments to student records
+   - Upload grades
+
 
 ## Current Implementation Status
+- Hifz progress is being implemented
+- Academics progress is not yet implemented
 
-### Completed Files:
 
 #### Admin Section:
 1. HTML Files:
