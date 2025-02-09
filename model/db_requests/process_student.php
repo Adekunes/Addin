@@ -2,7 +2,7 @@
 // Prevent any output before headers
 /* ---------------------------------------- 
 
-THIS IS THE PROCESS STUDENT FILE FOR THE ADMIN
+THIS IS THE PROCESS STUDENT FILE. IT CONTAINS ALL THE ACTIONS THAT CAN BE PERFORMED ON A STUDENT.
 It makes use of the admin_db.php file to connect to the database
 
 It does the following :
