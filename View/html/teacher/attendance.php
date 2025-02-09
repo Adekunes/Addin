@@ -1,4 +1,13 @@
 <?php
+/**
+ * Teacher Attendance Page
+ * Allows teachers to:
+ * - Select class and date
+ * - Mark student attendance
+ * - Add attendance notes
+ * - Save attendance records
+ * Requires teacher authentication
+ */
 session_start();
 require_once '../../../model/auth/teacher_auth.php';
 
