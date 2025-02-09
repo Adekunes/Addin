@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadDashboardStats() {
     try {
-        const response = await fetch('../../../model/auth/process_dashboard.php', {
+        const response = await fetch('../../../model/db_requests/process_dashboard.php', {
             method: 'GET',
             credentials: 'include',
             headers: {

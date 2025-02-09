@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 const formData = new FormData(this);
-                const response = await fetch('../../../model/auth/process_student.php', {
+                const response = await fetch('../../../model/db_requests/process_student.php', {
                     method: 'POST',
                     body: formData
                 });

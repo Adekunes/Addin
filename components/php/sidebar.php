@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 ?>
 
-<link rel="stylesheet" href="/Source_folder_final_v2/components/layouts/admin_sidebar.css">
+<link rel="stylesheet" href="/Source_folder_final_v2/components/css/admin_sidebar.css">
 
 <!-- Add Burger Menu Button -->
 <div class="burger-menu">

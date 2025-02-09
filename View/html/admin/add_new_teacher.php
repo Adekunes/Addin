@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Teacher - Dar-al-uloom</title>
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="../../css/admin/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -96,14 +96,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../../components/layouts/sidebar.js"></script>
+    <script src="../../../components/js/sidebar.js"></script>
     <script>
         document.getElementById('addTeacherForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             try {
                 const formData = new FormData(this);
-                const response = await fetch('../../../model/auth/process_teacher.php', {
+                const response = await fetch('../../../model/db_requests/process_teacher.php', {
                     method: 'POST',
                     body: formData
                 });

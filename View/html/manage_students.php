@@ -1,4 +1,13 @@
 <?php
+/* ---------------------------------------- 
+
+THIS IS THE MANAGE STUDENTS PAGE FOR THE ADMIN
+It makes use of :
+ - the admin_manage_students.js file to manage the students
+ - the admin_db.php file to connect to the database
+ - the admin_auth.php file to authenticate the admin
+
+---------------------------------------- */
 session_start();
 require_once '../../model/auth/admin_auth.php';
 require_once '../../model/sql/admin_db.php';
@@ -29,15 +38,15 @@ echo "<!-- Student data: " . print_r($students, true) . " -->";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Students - Dar-al-uloom</title>
-    <link rel="stylesheet" href="../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../components/css/sidebar.css">
     <link rel="stylesheet" href="../../View/css/manage_students.css">
     <link rel="stylesheet" href="../css/admin/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <!-- JavaScript Files - Load before body -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../components/layouts/sidebar.js"></script>
-    <script src="../../components/js/admin_manage_students.js"></script>
+    <script src="../../components/js/sidebar.js"></script>
+    <script src="../../model/js/admin_manage_students.js"></script>
     <style>
       
     </style>

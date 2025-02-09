@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="../../css/admin/styles.css">
-    <link rel="stylesheet" href="../../../components/layouts/sidebar.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
@@ -60,7 +60,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <script src="../../../components/layouts/sidebar.js"></script>
-    <script src="../../../components/js/admin_reports.js"></script>
+    <script src="../../../components/css/sidebar.js"></script>
+    <script src="../../../model/js/admin_reports.js"></script>
 </body>
 </html>

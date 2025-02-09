@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/Source_folder_final_v2/components/layouts/admin_sidebar.css">
+<link rel="stylesheet" href="/Source_folder_final_v2/components/css/admin_sidebar.css">
 
 <div class="sidebar" id="mainSidebar" data-theme="dark">
         <div class="logo">

@@ -29,7 +29,7 @@ function viewTeacher(teacherId) {
 
 function editTeacher(teacherId) {
     console.log('Editing teacher with ID:', teacherId); // Debug log
-    fetch(`../../../model/auth/process_teacher.php?action=get_teacher&id=${teacherId}`)
+    fetch(`../../../model/db_requests/process_teacher.php?action=get_teacher&id=${teacherId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 const formData = new FormData(this);
-                const response = await fetch('../../../model/auth/process_teacher.php', {
+                const response = await fetch('../../../model/db_requests/process_teacher.php', {
                     method: 'POST',
                     body: formData
                 });
