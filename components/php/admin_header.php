@@ -1,13 +1,27 @@
-<header class="header">
-    <img src="/path/to/logo.png" alt="Dar Al-'Ulum Montréal Logo" class="logo">
-    <h1>Dar Al-'Ulum Montréal - Admin Portal</h1>
-    <nav>
-        <ul>
-            <li><a href="/View/html/admin/dashboard.html">Dashboard</a></li>
-            <li><a href="/View/html/admin/manage_teachers.html">Manage Teachers</a></li>
-            <li><a href="/View/html/admin/manage_students.html">Manage Students</a></li>
-            <li><a href="/View/html/admin/reports.html">Reports</a></li>
-            <li><a href="#" id="logout">Logout</a></li>
-        </ul>
-    </nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hifz Management System - Admin</title>
+    <!-- Common CSS -->
+    <link rel="stylesheet" href="../../css/admin/styles.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<header class="admin-header">
+    <div class="header-left">
+        <div class="search-container">
+            <input type="text" placeholder="Search..." class="search-input">
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="notifications">
+            <span class="badge">1</span>
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="user-info">
+            <img src="/assets/images/default-avatar.png" alt="Admin" class="avatar">
+            <span>Admin User</span>
+        </div>
+    </div>
 </header>

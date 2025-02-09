@@ -23,4 +23,27 @@ function logoutAdmin() {
 }
 
 // Add more authentication-related functions as needed
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_student') {
+    $studentId = $_GET['id'];
+    $student = $adminDb->getStudentById($studentId);
+    echo json_encode($student);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if ($data['action'] === 'update_student') {
+        $result = $adminDb->updateStudent(
+            $data['studentId'],
+            $data['current_juz'],
+            $data['completed_juz'],
+            $data['status']
+        );
+        
+        echo json_encode(['success' => $result]);
+        exit;
+    }
+}
 ?>

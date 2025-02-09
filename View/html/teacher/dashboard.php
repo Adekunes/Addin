@@ -1,60 +1,59 @@
 <?php
 session_start();
+require_once '../../../model/auth/teacher_auth.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
+    header('Location: ../../login.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports - Dar Al-'Ulum Montréal</title>
-    <link rel="stylesheet" href="../../../View/css/admin/styles.css">
+    <title>Teacher Dashboard - Hifz Management System</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="../../css/admin/styles.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <button class="menu-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <?php require_once('../../../components/php/admin_sidebar.php'); ?>
-
+    <?php include '../../../components/php/sidebar.php'; ?>
+    
     <div class="main-content">
-        <div class="reports-section">
-            <h1>Reports</h1>
-            
-            <div class="report-buttons">
-                <button id="attendanceReportBtn" class="btn btn-primary">
-                    <i class="fas fa-clipboard-check"></i> Attendance Report
-                </button>
-                <button id="progressReportBtn" class="btn btn-primary">
-                    <i class="fas fa-chart-line"></i> Progress Report
-                </button>
-                <button id="teacherPerformanceBtn" class="btn btn-primary">
-                    <i class="fas fa-chalkboard-teacher"></i> Teacher Performance
-                </button>
+        <h1>Teacher Dashboard</h1>
+        
+        <div class="overview-cards">
+            <div class="card">
+                <h3>Today's Classes</h3> 
+                <div id="todayClasses">Loading...</div>
             </div>
+            <div class="card">
+                <h3>Total Students</h3>
+                <div id="totalStudents">Loading...</div>
+            </div>
+            <div class="card">
+                <h3>Pending Assessments</h3>
+                <div id="pendingAssessments">Loading...</div>
+            </div>
+        </div>
 
-            <div class="report-filters">
-                <select id="dateRange">
-                    <option value="week">Last Week</option>
-                    <option value="month">Last Month</option>
-                    <option value="quarter">Last Quarter</option>
-                    <option value="year">Last Year</option>
-                </select>
-                <button id="generateReportBtn" class="btn btn-secondary">Generate Report</button>
-            </div>
+        <div class="today-schedule">
+            <h2>Today's Schedule</h2>
+            <div id="scheduleTable"></div>
+        </div>
 
-            <div id="reportContent" class="report-content">
-                <!-- Report content will be displayed here -->
-            </div>
+        <div class="recent-activities">
+            <h2>Recent Activities</h2>
+            <div id="activitiesList"></div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../../../components/js/admin_reports.js"></script>
-    <script>
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../components/css/sidebar.js"></script>
+    <script src="../../../model/js/teacher_dashboard.js"></script>
 </body>
 </html>

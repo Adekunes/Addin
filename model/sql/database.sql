@@ -60,9 +60,18 @@ CREATE TABLE progress (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT,
     current_surah INT,
+    current_juz INT,
+    completed_juz INT,
     verses_memorized INT,
-    quality_rating ENUM('excellent', 'good', 'average', 'needsWork'),
-    notes TEXT,
+    quality_rating ENUM('excellent', 'good', 'average', 'needsWork', 'not_rated') NOT NULL DEFAULT 'not_rated',
+    tajweed_level ENUM('beginner', 'intermediate', 'advanced'),
+    teacher_notes TEXT,
     date DATE,
     FOREIGN KEY (student_id) REFERENCES students(id)
 );
+
+-- Add any missing columns if needed
+ALTER TABLE progress 
+    ADD COLUMN IF NOT EXISTS current_juz INT AFTER student_id,
+    ADD COLUMN IF NOT EXISTS completed_juz INT AFTER current_juz,
+    ADD COLUMN IF NOT EXISTS teacher_notes TEXT AFTER quality_rating;

@@ -1,86 +1,86 @@
 <?php
 session_start();
+require_once '../../../model/auth/teacher_auth.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
+    header('Location: ../../login.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Progress - Dar Al-'Ulum Montréal</title>
-    <link rel="stylesheet" href="../../../View/css/teacher/styles.css">
+    <title>Progress Update - Hifz Management System</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="../../css/teacher/styles.css">
+    <link rel="stylesheet" href="../../../components/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <button class="menu-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <?php require_once('../../../components/php/teacher_sidebar.php'); ?>
-
+    <?php include '../../../components/layouts/sidebar.html'; ?>
+    
     <div class="main-content">
-        <div class="progress-section">
-            <h1>Update Student Progress</h1>
+        <h1>Progress Update</h1>
 
-            <form id="progressForm" class="progress-form">
-                <div class="form-group">
-                    <label for="studentSelect">Select Student:</label>
-                    <select id="studentSelect" required>
-                        <option value="">Choose a student</option>
-                        <!-- Students will be populated dynamically -->
+        <div class="progress-container">
+            <div class="student-selector">
+                <select id="studentSelect">
+                    <?php
+                    require_once '../../../model/sql/teacher_queries.php';
+                    $students = getTeacherStudents($_SESSION['user_id']);
+                    foreach($students as $student) {
+                        echo "<option value='{$student['id']}'>{$student['name']}</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="quran-progress">
+                <div class="surah-selection">
+                    <select id="surahSelect">
+                        <!-- Will be populated with Surahs -->
                     </select>
-                </div>
-
-                <div class="progress-details">
-                    <div class="form-group">
-                        <label for="currentSurah">Current Surah:</label>
-                        <input type="number" id="currentSurah" min="1" max="114" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="versesMemorized">Verses Memorized:</label>
-                        <input type="number" id="versesMemorized" min="0" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="qualityRating">Quality Rating:</label>
-                        <select id="qualityRating" required>
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="average">Average</option>
-                            <option value="needsWork">Needs Work</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="teacherNotes">Notes:</label>
-                        <textarea id="teacherNotes" rows="4"></textarea>
+                    <div class="verse-range">
+                        <input type="number" id="startVerse" placeholder="Start Verse">
+                        <input type="number" id="endVerse" placeholder="End Verse">
                     </div>
                 </div>
 
-                <div class="previous-progress">
-                    <h3>Previous Progress</h3>
-                    <div class="progress-history" id="progressHistory">
-                        <!-- Progress history will be populated dynamically -->
+                <div class="assessment">
+                    <h3>Assessment</h3>
+                    <div class="assessment-criteria">
+                        <div class="criterion">
+                            <label>Memorization Quality</label>
+                            <input type="range" min="1" max="10" id="memorizationScore">
+                        </div>
+                        <div class="criterion">
+                            <label>Tajweed</label>
+                            <input type="range" min="1" max="10" id="tajweedScore">
+                        </div>
+                        <div class="criterion">
+                            <label>Fluency</label>
+                            <input type="range" min="1" max="10" id="fluencyScore">
+                        </div>
                     </div>
-                </div>
+                    
+                    <div class="notes-section">
+                        <textarea id="progressNotes" placeholder="Add notes about the student's progress..."></textarea>
+                    </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Progress
-                    </button>
-                    <button type="reset" class="btn btn-secondary">
-                        <i class="fas fa-undo"></i> Reset
+                    <button onclick="saveProgress()" class="btn btn-primary">
+                        Save Progress
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <script src="../../../components/js/teacher_progress_update.js"></script>
-    <script>
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../components/js/sidebar.js"></script>
+    <script src="../../../model/js/teacher_progress_update.js"></script>
 </body>
 </html>
